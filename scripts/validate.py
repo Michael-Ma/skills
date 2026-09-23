@@ -1,0 +1,87 @@
+"""Check distributable skill metadata and local file references, not design quality."""
+from pathlib import Path
+import re
+import sys
+from urllib.parse import unquote, urlsplit
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+MARKDOWN_LINK = re.compile(r"\]\((<[^>]+>|[^)\s]+)(?:\s+\"[^\"]*\")?\)")
+
+
+def validate(root: Path) -> list[str]:
+    root = root.resolve()
+    errors = []
+    skills = sorted((root / "skills").glob("*/SKILL.md"))
+    if not skills:
+        errors.append("No skills found under skills/<name>/SKILL.md")
+    for entry in skills:
+        relative = entry.relative_to(root)
+        text = entry.read_text(encoding="utf-8")
+        frontmatter = re.match(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|$)", text, re.DOTALL)
+        if not frontmatter:
+            errors.append(f"{relative}: missing YAML frontmatter")
+            continue
+        try:
+            meta = yaml.safe_load(frontmatter.group(1))
+        except yaml.YAMLError as exc:
+            errors.append(f"{relative}: invalid YAML: {exc}")
+            continue
+        if not isinstance(meta, dict):
+            errors.append(f"{relative}: frontmatter must be a mapping")
+            continue
+        name, description = meta.get("name"), meta.get("description")
+        if not isinstance(name, str) or not NAME.fullmatch(name) or len(name) > 64:
+            errors.append(f"{relative}: invalid skill name")
+        elif name != entry.parent.name:
+            errors.append(f"{relative}: name does not match folder")
+        if not isinstance(description, str) or not description.strip() or len(description) > 1024:
+            errors.append(f"{relative}: description must contain 1–1024 characters")
+        if not text[frontmatter.end():].strip():
+            errors.append(f"{relative}: empty skill instructions")
+
+        ui_path = entry.parent / "agents" / "openai.yaml"
+        if ui_path.exists():
+            try:
+                ui = yaml.safe_load(ui_path.read_text(encoding="utf-8"))
+                interface = ui.get("interface") if isinstance(ui, dict) else None
+                if not isinstance(interface, dict):
+                    errors.append(f"{ui_path.relative_to(root)}: missing interface mapping")
+                else:
+                    for key in ("display_name", "short_description", "default_prompt"):
+                        if not isinstance(interface.get(key), str) or not interface[key].strip():
+                            errors.append(f"{ui_path.relative_to(root)}: missing {key}")
+            except yaml.YAMLError as exc:
+                errors.append(f"{ui_path.relative_to(root)}: invalid YAML: {exc}")
+
+    docs = [root / "README.md", *(root / "docs").rglob("*.md"), *(root / "skills").rglob("*.md")]
+    for doc in docs:
+        if not doc.exists():
+            errors.append(f"Missing document: {doc.relative_to(root)}")
+            continue
+        text = doc.read_text(encoding="utf-8")
+        # Examples may include placeholder paths; check authored Markdown links only.
+        text = re.sub(r"(?ms)^(`{3,}|~{3,})[^\n]*\n.*?^\1\s*$", "", text)
+        for match in MARKDOWN_LINK.finditer(text):
+            target = match.group(1).strip("<>")
+            parsed = urlsplit(target)
+            if parsed.scheme or parsed.netloc or not parsed.path:
+                continue
+            path = unquote(parsed.path)
+            destination = (doc.parent / path).resolve()
+            if Path(path).is_absolute() or not destination.is_relative_to(root):
+                errors.append(f"{doc.relative_to(root)}: non-portable local link {target}")
+            elif not destination.exists():
+                errors.append(f"{doc.relative_to(root)}: missing local link {target}")
+    return errors
+
+
+if __name__ == "__main__":
+    failures = validate(ROOT)
+    if failures:
+        print("\n".join(f"ERROR: {message}" for message in failures), file=sys.stderr)
+        raise SystemExit(1)
+    count = len(list((ROOT / "skills").glob("*/SKILL.md")))
+    print(f"Validated {count} skills: metadata and local file references pass.")

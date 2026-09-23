@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Artifact Studio"
+  short_description: "Create and refine reviewable UI/UX artifacts"
+  default_prompt: "Use $design-artifact-studio to create or refine a thoughtful UI/UX artifact at the fidelity and format this brief needs."
