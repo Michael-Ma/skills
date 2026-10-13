@@ -13,7 +13,7 @@ Read the request, supplied references, relevant existing screens, and any projec
 
 Establish the kind of work and fidelity needed: critique, visual exploration, functional prototype, extension/refinement, constrained reconstruction, or a combination. State what must remain fixed and what may change. A critique can end with findings; a visual study can remain static; a functional prototype must support its promised actions. Do not add screens or behavior merely to satisfy a process checklist.
 
-Identify the audience, situation, primary task, necessary information, and successful outcome. Separate supplied facts from sample content and assumptions. For multi-screen work, identify the entry point and the state users should reach. Ask only for missing information that would materially change the design. Offer a specific recommendation when taste is open; do useful work while awaiting optional input. Do not introduce an approval gate for ordinary local prototyping.
+Identify the audience, situation, primary task, necessary information, and successful outcome. Separate supplied facts from sample content and assumptions. For multi-screen work, identify the entry point and the state users should reach. Ask only for missing information that would materially change the design. Offer a specific recommendation when taste is open; do useful work while awaiting optional input. Do not introduce an approval gate for ordinary local prototyping; the one planned stop is the person's choice of visual direction when it is open.
 
 Make success observable before styling: what must the person understand, decide or finish, and what would show that they succeeded? For a new product flow, read the structure guidance in [references/interaction-design.md](references/interaction-design.md) before choosing screens. Keep this proportional: a small component edit does not need a new product strategy.
 
@@ -34,6 +34,8 @@ A product can need several of these. Decide per surface, not once for the entire
 
 When choosing an original direction or translating supplied visual references, read [references/art-direction.md](references/art-direction.md). Identify each reference's role: exact target, existing-system constraint, inspiration, or source content. Compare or borrow only what that role and the brief justify; preserve evidenced defining decisions for a reconstruction.
 
+When the visual direction itself is open, with no existing system, selected concept or supplied target, run the direction round in [references/divergence.md](references/divergence.md) before building: three dealt directions shown as static studies, then the person's choice. A model's first direction, and its own choice of alternatives, repeat from brief to brief; the deal is what makes the options worth choosing between.
+
 Explore only choices that are open. When the user requests alternatives, produce two or three small visual directions using representative content and the allowed dimensions of change. Structural exploration may vary reading order or task organization; a styling study may deliberately hold both fixed. Otherwise select and briefly explain a suitable direction without manufacturing alternatives for a settled design.
 
 State the selected direction in concrete terms: what takes visual priority, how information is organized, what gives it character, and why this serves the audience. Design around actual content early. A familiar convention is valid when it makes the task easier. A surprising treatment must earn its cost in comprehension.
@@ -41,7 +43,7 @@ State the selected direction in concrete terms: what takes visual priority, how 
 For substantial artifacts, create or update a short `DESIGN.md` alongside the artifact. Record:
 
 - Audience, primary task, scope, sample-data assumptions, and any open product decision being examined.
-- Chosen direction, reference observations, and important rejected alternatives with reasons.
+- Chosen direction, reference observations, and important rejected alternatives with reasons. After a direction round: the seed, the directions shown, and what the person chose and said.
 - Semantic color roles, typography with actual available fonts and fallbacks, spacing, component treatment, and responsive behavior.
 - Principal interaction states and what is simulated.
 

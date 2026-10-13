@@ -15,7 +15,7 @@ A reference can serve more than one role; specify which qualities belong to each
 
 Use a few discriminating questions when needed: Which part of this reference appeals to the user? What feels wrong in the current design? Is the surface for repeated daily use or occasional discovery? Avoid asking a non-designer to choose hex values and font metrics.
 
-If references are missing, derive a direction from the subject, its content, and its audience. Any external visual research should be narrow and useful; do not browse indefinitely for a mood.
+If references are missing, derive a direction from the subject, its content, and its audience. Any external visual research should be narrow and useful; do not browse indefinitely for a mood. When the person will choose the direction, deal the alternatives with [divergence.md](divergence.md) and give each one its detail from the subject.
 
 ## Separate independent choices
 
