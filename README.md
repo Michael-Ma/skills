@@ -17,7 +17,7 @@ Use either skill independently. When you want both, explore with `ui-design-brai
 
 When the visual direction is open, both skills run a direction round before anything is built. They show three directions, each as a static study or a concept image, and stop for your choice. You can pick one, combine several, redirect, or ask for another set. Ask for one quick result to skip the round.
 
-The three directions are dealt by a small seeded script, with two positions left open for the agent to fill from the subject's own world. They are not the model's own picks, and that is deliberate. In the author's rendered comparisons, a model choosing its own alternatives returned the same three looks on five different briefs. On the one brief where both were tried, the reviewer preferred the dealt set. That is one reviewer's judgment on a handful of briefs, not a benchmark.
+The three directions are dealt by a small seeded script. Before the deal, the agent writes a few cards from what you told it: your business objective, the scene of use, products that do the same job, and the subject's own world. Each direction then carries one of those cards, picked at random. The directions are not the model's own picks, and that is deliberate. In the author's rendered comparisons, a model choosing its own alternatives returned the same three looks on five different briefs. On the one brief where both were tried, the reviewer preferred the dealt set. That is one reviewer's judgment on a handful of briefs, not a benchmark.
 
 ## Install
 

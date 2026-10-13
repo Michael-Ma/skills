@@ -43,18 +43,24 @@ def check_deal(root: Path, seeds: int = 200) -> list[str]:
         for seed in range(seeds):
             rng = random.Random(seed)
             sets = module.deal(rng)
-            marked = module.mark_open(sets, rng)
+            cards = [(axis, f"sample {n}") for n, axis in enumerate(list(module.AXES)[: seed % 6])]
+            marked = module.place_subject(sets, cards, rng)
             again = random.Random(seed)
-            if module.mark_open(module.deal(again), again) != marked:
+            if module.place_subject(module.deal(again), cards, again) != marked:
                 errors.append(f"{relative}: seed {seed} does not repeat its deal")
                 break
             if any(module.shared(a, b) > module.MAX_SHARED for a, b in itertools.combinations(sets, 2)):
                 errors.append(f"{relative}: seed {seed} deals sets sharing more than {module.MAX_SHARED} values")
                 break
-            cells = [(i, axis) for i, values in enumerate(marked) for axis, value in values.items() if value == module.OPEN]
-            spread = len({i for i, _ in cells}) == len({axis for _, axis in cells}) == module.OPEN_COUNT
-            if len(cells) != module.OPEN_COUNT or not spread or any(axis not in module.OPEN_AXES for _, axis in cells):
-                errors.append(f"{relative}: seed {seed} places its open positions wrongly")
+            changed = [[axis for axis in values if values[axis] != before[axis]] for before, values in zip(sets, marked)]
+            placed = [(axis, values[axis]) for values, axes in zip(marked, changed) for axis in axes]
+            dealt_cards = [(axis, value[len(module.CARD):]) for axis, value in placed if value.startswith(module.CARD)]
+            opens = [axis for axis, value in placed if value == module.OPEN]
+            one_each = all(len(axes) == 1 for axes in changed)
+            cards_first = len(dealt_cards) == min(len(cards), len(sets)) and len(set(dealt_cards)) == len(dealt_cards)
+            valid = all(card in cards for card in dealt_cards) and all(axis in module.OPEN_AXES for axis in opens)
+            if not (one_each and cards_first and valid and len(dealt_cards) + len(opens) == len(sets)):
+                errors.append(f"{relative}: seed {seed} does not give each set one card or open position")
                 break
         guide = script.parent.parent / "references" / "divergence.md"
         if not guide.exists():

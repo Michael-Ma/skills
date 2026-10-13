@@ -113,13 +113,14 @@ To authorize a subsequent refinement, follow with: “Apply findings 1 and 2 to 
 When you have no look in mind, say so. The skill deals three directions, shows each as a static study, and stops:
 
 ```text
-Use $design-artifact-studio for Alder's library screen. The visual
-direction is open and I will choose it. Show me three directions for
+Use $design-artifact-studio for Alder's library screen. The goal is
+that a researcher finds last month's note in under ten seconds. The
+visual direction is open and I will choose it. Show me three directions for
 the screen with the three fictional notes from example 1, all
 discussion markers off. Do not build the working prototype yet.
 ```
 
-Each direction comes with the values it was dealt, what the agent supplied from the subject's own world for the open positions, and one line on what it gains and risks. Reply with a choice, a combination, a redirect, or “deal again”. Then authorize the build:
+Each direction comes with the values it was dealt, the card it carries and where that card came from, and one line on what it gains and risks. Stating an objective, a scene of use or comparable products gives the agent more to write cards from. Reply with a choice, a combination, a redirect, a card to add or strike, or “deal again”. Then authorize the build:
 
 ```text
 I choose direction 2. Build the working prototype from that study in
