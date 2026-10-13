@@ -1,4 +1,4 @@
 interface:
   display_name: "UI Design Brainstorm"
-  short_description: "Explore UI directions with native image generation"
+  short_description: "Explore UI directions as generated concept images"
   default_prompt: "Use $ui-design-brainstorm to explore visual directions and prepare a selected-concept handoff."

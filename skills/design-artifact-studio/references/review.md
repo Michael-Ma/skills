@@ -30,7 +30,7 @@ A browser automation check can detect layout overflow or state mismatches; it ca
 
 ## Make the review actionable
 
-Record only material observations in a small `VALIDATION.md` for substantial work. Select applicable rows; these examples do not require adding missing features:
+Record only material observations in a small `VALIDATION.md`, for the same work that gets a `DESIGN.md`. Select applicable rows; these examples do not require adding missing features:
 
 | View or action | Expected | Observed | Evidence / status |
 |---|---|---|---|

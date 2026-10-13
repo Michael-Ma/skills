@@ -1,6 +1,6 @@
 ---
 name: design-artifact-studio
-description: Create, critique, and refine reviewable UI/UX artifacts from a brief or references. Use for app screens, flows, editorial experiences, website design studies, visual comparisons, and functional prototypes. Match fidelity and format to the request; preserve an existing project's stack and design system when refining its UI. Not for backend implementation or image-only generation.
+description: Design, prototype, critique, and refine UI as rendered, reviewable artifacts, such as mockups, app screens and flows, landing and editorial pages, redesigns, side-by-side direction studies, and working HTML prototypes. Use when the user wants a screen or page designed, prototyped, reviewed, or improved, including inside an existing project, where its stack and design system are kept. For AI-generated concept images use ui-design-brainstorm. Not for backend implementation.
 ---
 
 # Design Artifact Studio
@@ -34,13 +34,15 @@ A product can need several of these. Decide per surface, not once for the entire
 
 When choosing an original direction or translating supplied visual references, read [references/art-direction.md](references/art-direction.md). Identify each reference's role: exact target, existing-system constraint, inspiration, or source content. Compare or borrow only what that role and the brief justify; preserve evidenced defining decisions for a reconstruction.
 
+When the work starts from a ui-design-brainstorm handoff, read `HANDOFF.md` and inspect its linked image before choosing anything. Its status says whether a person selected the concept, and its build request says what is authorized; without a build request, ask before building. Treat the image in the role the handoff gives it. Requirements and the person's stated decisions outrank painted details: the handoff's Correct list is binding, and its Resolve list names what you decide or ask.
+
 When the visual direction itself is open, with no existing system, selected concept or supplied target, run the direction round in [references/divergence.md](references/divergence.md) before building: three dealt directions shown as static studies, then the person's choice. A model's first direction, and its own choice of alternatives, repeat from brief to brief; the deal is what makes the options worth choosing between.
 
 Explore only choices that are open. When the user requests alternatives, produce two or three small visual directions using representative content and the allowed dimensions of change. Structural exploration may vary reading order or task organization; a styling study may deliberately hold both fixed. Otherwise select and briefly explain a suitable direction without manufacturing alternatives for a settled design.
 
 State the selected direction in concrete terms: what takes visual priority, how information is organized, what gives it character, and why this serves the audience. Design around actual content early. A familiar convention is valid when it makes the task easier. A surprising treatment must earn its cost in comprehension.
 
-For substantial artifacts, create or update a short `DESIGN.md` alongside the artifact. Record:
+For a new surface, a direction round, or a multi-screen prototype, create or update a short `DESIGN.md` alongside the artifact. Record:
 
 - Audience, primary task, scope, sample-data assumptions, and any open product decision being examined.
 - Chosen direction, reference observations, and important rejected alternatives with reasons. After a direction round: the seed, the directions shown, and what the person chose and said.
@@ -55,7 +57,7 @@ Read [references/html-delivery.md](references/html-delivery.md) when creating st
 
 Before implementation or a substantial refinement, use the [review planning guidance](references/review.md#plan-the-checks-around-the-artifact) to define critical checks for the actual medium, fidelity, features, and supported layouts.
 
-Default to a self-contained HTML file with embedded CSS and modest JavaScript for an interactive prototype. Use local companion assets when fidelity justifies them and bundle them for delivery. Favor SVG for an inherently vector diagram; use the relevant document tools for a requested PDF or slide deck. In an existing application, keep its framework and conventions. Select the format by the decision the user needs to make, not by the skill's favorite technology.
+Default to a self-contained HTML file with embedded CSS and modest JavaScript for an interactive prototype. Unless the project or the person names a place, save a standalone artifact and its records in `outputs/<short-name>/`. Use local companion assets when fidelity justifies them and bundle them for delivery. Favor SVG for an inherently vector diagram; use the relevant document tools for a requested PDF or slide deck. In an existing application, keep its framework and conventions. Select the format by the decision the user needs to make, not by the skill's favorite technology.
 
 Build the primary content and experience first, then the surrounding interface. Use semantic tokens rather than scattered aesthetic decisions. When small screens are supported, design their hierarchy deliberately; shrinking the desktop composition is insufficient. Add expression where it serves the brief, and preserve useful conventions. A restrained interface still needs considered typography, proportions, spacing, color relationships, and imagery.
 
@@ -69,8 +71,4 @@ Read [references/review.md](references/review.md). Inspect the result in its act
 
 Prioritize defects that block the task, mislead the user, hide content, or break access. Then improve the few visual decisions with the greatest effect. Recheck affected views after fixes. Stop when the agreed scope works and the remaining observations are optional taste alternatives; do not iterate indefinitely for an unsupported perfection score. If rendering or a specific check is unavailable, identify it as unverified.
 
-Deliver the requested artifact or critique, a brief rationale, relevant verification evidence, and material limits. Provide a clickable artifact and explain what can be tried when interaction is promised. Open artifacts in the app when supported. Include screenshots or a portable bundle when useful. Keep implementation and research notes outside the product's main flow. End a collaborative design round with a concrete next decision only when one remains.
-
-## Research provenance
-
-This is an original synthesis informed by four public skill projects. [references/provenance.md](references/provenance.md) records the exact versions and the design choices retained or rejected. It is background for maintaining the skill, not a dependency to load on every design task. The skill requires none of those projects' installers, binaries, hooks, or databases.
+Deliver the requested artifact or critique, a brief rationale, relevant verification evidence, and material limits. Name `DESIGN.md` and `VALIDATION.md` where you wrote them; inside an existing repository, put such records where its conventions put documentation. Provide a clickable artifact and explain what can be tried when interaction is promised. Open artifacts in the app when supported. Include screenshots or a portable bundle when useful. Keep implementation and research notes outside the product's main flow. End a collaborative design round with a concrete next decision only when one remains.
