@@ -164,7 +164,8 @@ def check_deal(record: str, deal) -> tuple[bool, str]:
             return False, f"seed {seed}: {error}"
         expected = deal.describe(seed, cards).splitlines()
         if lines[: len(expected)] != expected:
-            return False, f"seed {seed}: the recorded sets are not what the script deals for that seed and those cards"
+            return False, (f"seed {seed}: the recorded sets are not what the script deals for that seed and those cards "
+                           "(or draw_axes.py has changed since that deal)")
     last = blocks[-1].strip().splitlines()
     return True, f"{len(blocks)} deal(s) reproduce; last is {last[0]} with {sum(l.startswith('card: ') for l in last)} cards"
 

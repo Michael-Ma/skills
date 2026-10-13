@@ -51,6 +51,8 @@ AXES = {
 }
 # Axes where a set without a card may ask for one to be written on the spot.
 OPEN_AXES = ("Structure of the primary object", "Canvas", "Type", "Shape language", "Source world")
+# The two axes that most change what is seen; no value repeats on them within a deal.
+DISTINCT_AXES = ("Structure of the primary object", "Canvas")
 OPEN = "open"
 CARD = "card: "
 MAX_SHARED = 2
@@ -62,10 +64,11 @@ def shared(a: dict[str, str], b: dict[str, str]) -> int:
 
 
 def deal(rng: random.Random) -> list[dict[str, str]]:
-    """Three sets of values; no two sets share more than MAX_SHARED values."""
+    """Three sets of values. No two share more than MAX_SHARED, and none repeats on DISTINCT_AXES."""
     while True:
         sets = [{axis: rng.choice(values) for axis, values in AXES.items()} for _ in range(3)]
-        if all(shared(a, b) <= MAX_SHARED for a, b in itertools.combinations(sets, 2)):
+        apart = all(shared(a, b) <= MAX_SHARED for a, b in itertools.combinations(sets, 2))
+        if apart and all(len({values[axis] for values in sets}) == len(sets) for axis in DISTINCT_AXES):
             return sets
 
 

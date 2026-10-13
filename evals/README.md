@@ -41,7 +41,7 @@ python3 evals/run.py check /path/to/folder --brief agent-review --runner codex-a
 The script checks only what a script can:
 
 - **files**: three studies, `DESIGN.md` and `deal.txt` exist.
-- **deal**: every deal recorded in `deal.txt` is exactly what `draw_axes.py` prints for the seed and cards it names. A deal written by hand, or sets edited after the fact, fail here.
+- **deal**: every deal recorded in `deal.txt` is exactly what `draw_axes.py` prints for the seed and cards it names. A deal written by hand, or sets edited after the fact, fail here. So does a deal made with an earlier version of the script, since a seed reproduces only under the version that dealt it.
 - **content**: each study contains the strings listed in the brief's `must_contain`.
 - **self-contained**: a study loads nothing from outside except Google Fonts.
 - **renders**: each study renders at the brief's size.

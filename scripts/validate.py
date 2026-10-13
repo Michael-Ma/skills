@@ -52,6 +52,9 @@ def check_deal(root: Path, seeds: int = 200) -> list[str]:
             if any(module.shared(a, b) > module.MAX_SHARED for a, b in itertools.combinations(sets, 2)):
                 errors.append(f"{relative}: seed {seed} deals sets sharing more than {module.MAX_SHARED} values")
                 break
+            if any(len({values[axis] for values in sets}) < len(sets) for axis in module.DISTINCT_AXES):
+                errors.append(f"{relative}: seed {seed} repeats a value on an axis that must differ")
+                break
             changed = [[axis for axis in values if values[axis] != before[axis]] for before, values in zip(sets, marked)]
             placed = [(axis, values[axis]) for values, axes in zip(marked, changed) for axis in axes]
             dealt_cards = [(axis, value[len(module.CARD):]) for axis, value in placed if value.startswith(module.CARD)]
