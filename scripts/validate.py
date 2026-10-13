@@ -118,7 +118,9 @@ def validate(root: Path) -> list[str]:
             except yaml.YAMLError as exc:
                 errors.append(f"{ui_path.relative_to(root)}: invalid YAML: {exc}")
 
-    docs = [root / "README.md", *(root / "docs").rglob("*.md"), *(root / "skills").rglob("*.md")]
+    # evals/out holds agents' own files and is not part of the collection
+    docs = [root / "README.md", *(root / "docs").rglob("*.md"), *(root / "skills").rglob("*.md"),
+            *(root / "evals").glob("*.md"), *(root / "evals" / "briefs").glob("*.md")]
     for doc in docs:
         if not doc.exists():
             errors.append(f"Missing document: {doc.relative_to(root)}")

@@ -96,6 +96,12 @@ python3 -m venv .venv
 
 The same checks run in GitHub Actions. They check metadata, local file references, that files carried by both skills are identical, and that the direction deal keeps its constraints. They do not check heading anchors, visual taste, accessibility conformance, or behavior on unseen briefs. Evaluation across briefs is a separate activity from validating an individual artifact.
 
+To see what an agent produces with these skills, run a brief through Codex or Claude Code with [evals/run.py](evals/README.md). It renders the three directions onto one sheet for you to judge, and checks that the recorded deal is the one the script dealt:
+
+```sh
+python3 evals/run.py run --runner codex --brief agent-review
+```
+
 ## Acknowledgments
 
 The collection structure is inspired by [Matt Pocock's skills repository](https://github.com/mattpocock/skills). Its skill implementations are not copied here.

@@ -100,6 +100,21 @@ def redraw(axis: str, exclude: str | None, rng: random.Random) -> str:
     return rng.choice([value for value in AXES[axis] if value != exclude])
 
 
+def describe(seed: int, cards: list[tuple[str, str]]) -> str:
+    """The printed form of a deal. The same seed and cards, in the same order, give the same text."""
+    rng = random.Random(seed)
+    lines = [f"seed {seed}"] + [f"card: {axis}={value}" for axis, value in cards]
+    for number, values in enumerate(place_subject(deal(rng), cards, rng), 1):
+        lines += ["", f"Direction {number}"]
+        for axis, value in values.items():
+            if value == OPEN:
+                value = "open (write a card for this axis now, from the subject's own world)"
+            elif value.startswith(CARD):
+                value = "[card] " + value[len(CARD):]
+            lines.append(f"  {axis}: {value}")
+    return "\n".join(lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -126,15 +141,7 @@ def main() -> None:
     except ValueError as error:
         raise SystemExit(str(error))
 
-    print(f"seed {seed}")
-    for number, values in enumerate(place_subject(deal(rng), cards, rng), 1):
-        print(f"\nDirection {number}")
-        for axis, value in values.items():
-            if value == OPEN:
-                value = "open (write a card for this axis now, from the subject's own world)"
-            elif value.startswith(CARD):
-                value = "[card] " + value[len(CARD):]
-            print(f"  {axis}: {value}")
+    print(describe(seed, cards))
 
 
 if __name__ == "__main__":
