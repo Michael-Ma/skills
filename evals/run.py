@@ -70,7 +70,7 @@ def parse_brief(text: str) -> Brief:
 def compose_prompt(brief: Brief, run_dir: Path) -> str:
     return f"""This is a delegated design task; proceed without a planning approval step.
 
-First read the skill at {SKILL / "SKILL.md"} and follow it, including the reference files it tells you to read for this kind of work. Use only this copy: an older copy of the same skill may be installed on this machine, and it must not be read or followed. The skill folder is read-only for you: read it and run its script, but change nothing in it. Then complete the brief below according to that skill.
+First read the skill at {SKILL / "SKILL.md"} and follow it, including the reference files it tells you to read for this kind of work. Use only this copy: an older copy of the same skill may be installed on this machine, and it must not be read or followed. The skill folder is read-only for you: read it and run its script, but change nothing in it. If `python3` does not work in your shell, use {sys.executable}. Then complete the brief below according to that skill.
 
 Brief:
 
