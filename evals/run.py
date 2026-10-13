@@ -4,6 +4,8 @@
   python3 evals/run.py run --runner codex --brief agent-review
   python3 evals/run.py run --runner claude --all
   python3 evals/run.py run --runner codex --all --dry-run
+  python3 evals/run.py prompt --brief agent-review --dir /path/to/folder   print the prompt for any agent
+  python3 evals/run.py check /path/to/folder --brief agent-review          check and render what it made
   python3 evals/run.py compare evals/out/<run>/<brief> evals/out/<run>/<brief> --blind
 
 Taste is judged by a person looking at the sheet. The script checks only what a script can: that
@@ -300,23 +302,45 @@ def command_run(args: argparse.Namespace) -> int:
         code, seconds = run_agent(command, run_dir, log, args.timeout)
         if args.runner == "claude":
             (run_dir / "_eval" / "last-message.txt").write_text(log.read_text(encoding="utf-8"), encoding="utf-8")
-        checks = run_checks(brief, run_dir)
-        rendered = [(f"{brief.id} {n}", f"direction-{n}.png", brief.width) for n in DIRECTIONS
-                    if (run_dir / "_eval" / f"direction-{n}.png").is_file()]
-        if rendered:
-            write_sheet(run_dir / "_eval", f"{brief.title} · {args.runner}", rendered, brief.height)
-        model = re.search(r"(?m)^model: (.+)$", log.read_text(encoding="utf-8", errors="replace"))
-        result = {"brief": brief.id, "runner": args.runner, "model": args.model or (model.group(1).strip() if model else None),
-                  "exit": code, "seconds": seconds, "timed_out": code is None, "checks": checks}
-        (run_dir / "_eval" / "result.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        passed = code == 0 and all(check["ok"] for check in checks)
-        failed = failed or not passed
-        print(f"{brief.id}: exit {code}, {seconds}s, {'checks pass' if passed else 'CHECKS FAIL'}")
-        for check in checks:
-            if not check["ok"]:
-                print(f"  {check['check']}: {check['detail']}")
-        print(f"  sheet: {run_dir / '_eval' / 'sheet.png'}")
+        text = log.read_text(encoding="utf-8", errors="replace")
+        model = re.search(r"(?m)^model: (.+)$", text)
+        if code != 0:
+            print("  the agent did not finish cleanly; its log ends:\n    " + "\n    ".join(text.strip().splitlines()[-4:]))
+        passed = assess(brief, run_dir, {"runner": args.runner, "model": args.model or (model.group(1).strip() if model else None),
+                                         "exit": code, "seconds": seconds, "timed_out": code is None})
+        failed = failed or code != 0 or not passed
     return 1 if failed else 0
+
+
+def assess(brief: Brief, run_dir: Path, facts: dict) -> bool:
+    """Check a finished folder, render its sheet, write result.json and report. True when every check passes."""
+    (run_dir / "_eval").mkdir(parents=True, exist_ok=True)
+    checks = run_checks(brief, run_dir)
+    rendered = [(f"{brief.id} {n}", f"direction-{n}.png", brief.width) for n in DIRECTIONS
+                if (run_dir / "_eval" / f"direction-{n}.png").is_file()]
+    sheet = bool(rendered) and write_sheet(run_dir / "_eval", f"{brief.title} · {facts['runner']}", rendered, brief.height)[0]
+    result = {"brief": brief.id, **facts, "checks": checks}
+    (run_dir / "_eval" / "result.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    passed = all(check["ok"] for check in checks)
+    print(f"{brief.id}: {'checks pass' if passed else 'CHECKS FAIL'}"
+          + (f", exit {facts['exit']}, {facts['seconds']}s" if "seconds" in facts else ""))
+    for check in checks:
+        if not check["ok"]:
+            print(f"  {check['check']}: {check['detail']}")
+    print(f"  sheet: {run_dir / '_eval' / 'sheet.png'}" if sheet else "  no sheet: nothing rendered")
+    return passed
+
+
+def command_prompt(args: argparse.Namespace) -> int:
+    (brief,) = load_briefs([args.brief], False)
+    print(compose_prompt(brief, Path(args.dir).resolve()))
+    return 0
+
+
+def command_check(args: argparse.Namespace) -> int:
+    run_dir = Path(args.folder).resolve()
+    (brief,) = load_briefs([args.brief or run_dir.name], False)
+    return 0 if assess(brief, run_dir, {"runner": args.runner}) else 1
 
 
 def command_compare(args: argparse.Namespace) -> int:
@@ -365,6 +389,17 @@ def main() -> int:
     run.add_argument("--out", default=str(EVALS / "out"))
     run.add_argument("--dry-run", action="store_true", help="print what would run and stop")
     run.set_defaults(handler=command_run)
+
+    prompt = commands.add_parser("prompt", help="print a brief's prompt, to give to any agent by hand")
+    prompt.add_argument("--brief", required=True)
+    prompt.add_argument("--dir", required=True, help="folder the agent should write into")
+    prompt.set_defaults(handler=command_prompt)
+
+    check = commands.add_parser("check", help="check and render a folder an agent has already filled")
+    check.add_argument("folder")
+    check.add_argument("--brief", help="brief id; defaults to the folder's name")
+    check.add_argument("--runner", default="manual", help="who made it, for the sheet's title and result.json")
+    check.set_defaults(handler=command_check)
 
     compare = commands.add_parser("compare", help="put several runs' directions on one sheet")
     compare.add_argument("runs", nargs="+", help="run folders, each evals/out/<run>/<brief>")

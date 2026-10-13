@@ -25,6 +25,17 @@ Each brief gets a folder, `evals/out/<time>-<runner>/<brief>/`, which is ignored
 
 It needs Python 3.9 or newer, Google Chrome or Chromium, and the chosen CLI installed and logged in. Set `CHROME` to the browser's path if it is not found.
 
+### With any other agent
+
+The two CLIs are a convenience. To use an agent the runner cannot start, such as a desktop app, or when a CLI's login has expired, print the prompt, give it to the agent, and check the folder afterwards:
+
+```sh
+python3 evals/run.py prompt --brief agent-review --dir /path/to/folder
+python3 evals/run.py check /path/to/folder --brief agent-review --runner codex-app
+```
+
+`check` runs the same checks and renders the same sheet. An agent run this way needs to be able to start Chrome itself if it is to look at its own renders; the render queue is served only while `run` is running.
+
 ## What is checked, and what is left to you
 
 The script checks only what a script can:
