@@ -1,5 +1,8 @@
-"""Check distributable skill metadata and local file references, not design quality."""
+"""Check distributable skill metadata, local file references and the direction deal, not design quality."""
+import importlib.util
+import itertools
 from pathlib import Path
+import random
 import re
 import sys
 from urllib.parse import unquote, urlsplit
@@ -9,6 +12,59 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 MARKDOWN_LINK = re.compile(r"\]\((<[^>]+>|[^)\s]+)(?:\s+\"[^\"]*\")?\)")
+# Carried by more than one skill so that each installs on its own; the copies must not drift.
+SHARED = ("references/divergence.md", "scripts/draw_axes.py")
+TABLE_ROW = re.compile(r"^\| ([^|]+?) \| ([^|]+?) \|$", re.MULTILINE)
+
+
+def check_shared(root: Path) -> list[str]:
+    errors = []
+    for name in SHARED:
+        copies = sorted((root / "skills").glob(f"*/{name}"))
+        if len({copy.read_bytes() for copy in copies}) > 1:
+            listed = ", ".join(str(copy.relative_to(root)) for copy in copies)
+            errors.append(f"{name}: copies differ: {listed}")
+    return errors
+
+
+def check_deal(root: Path, seeds: int = 200) -> list[str]:
+    """The deal keeps the promises divergence.md makes about it, and the two list the same values."""
+    errors = []
+    for script in sorted((root / "skills").glob("*/scripts/draw_axes.py")):
+        relative = script.relative_to(root)
+        spec = importlib.util.spec_from_file_location("draw_axes", script)
+        module = importlib.util.module_from_spec(spec)
+        sys.dont_write_bytecode = True  # keep __pycache__ out of the skill folder
+        try:
+            spec.loader.exec_module(module)
+        except Exception as exc:
+            errors.append(f"{relative}: does not load: {exc}")
+            continue
+        for seed in range(seeds):
+            rng = random.Random(seed)
+            sets = module.deal(rng)
+            marked = module.mark_open(sets, rng)
+            again = random.Random(seed)
+            if module.mark_open(module.deal(again), again) != marked:
+                errors.append(f"{relative}: seed {seed} does not repeat its deal")
+                break
+            if any(module.shared(a, b) > module.MAX_SHARED for a, b in itertools.combinations(sets, 2)):
+                errors.append(f"{relative}: seed {seed} deals sets sharing more than {module.MAX_SHARED} values")
+                break
+            cells = [(i, axis) for i, values in enumerate(marked) for axis, value in values.items() if value == module.OPEN]
+            spread = len({i for i, _ in cells}) == len({axis for _, axis in cells}) == module.OPEN_COUNT
+            if len(cells) != module.OPEN_COUNT or not spread or any(axis not in module.OPEN_AXES for _, axis in cells):
+                errors.append(f"{relative}: seed {seed} places its open positions wrongly")
+                break
+        guide = script.parent.parent / "references" / "divergence.md"
+        if not guide.exists():
+            errors.append(f"{relative}: no references/divergence.md beside it")
+            continue
+        rows = dict(TABLE_ROW.findall(guide.read_text(encoding="utf-8")))
+        for axis, values in module.AXES.items():
+            if [value.strip() for value in rows.get(axis, "").split(" · ")] != values:
+                errors.append(f"{guide.relative_to(root)}: table row \"{axis}\" differs from {relative.name}")
+    return errors
 
 
 def validate(root: Path) -> list[str]:
@@ -75,7 +131,7 @@ def validate(root: Path) -> list[str]:
                 errors.append(f"{doc.relative_to(root)}: non-portable local link {target}")
             elif not destination.exists():
                 errors.append(f"{doc.relative_to(root)}: missing local link {target}")
-    return errors
+    return errors + check_shared(root) + check_deal(root)
 
 
 if __name__ == "__main__":
@@ -84,4 +140,4 @@ if __name__ == "__main__":
         print("\n".join(f"ERROR: {message}" for message in failures), file=sys.stderr)
         raise SystemExit(1)
     count = len(list((ROOT / "skills").glob("*/SKILL.md")))
-    print(f"Validated {count} skills: metadata and local file references pass.")
+    print(f"Validated {count} skills: metadata, local file references and the direction deal pass.")

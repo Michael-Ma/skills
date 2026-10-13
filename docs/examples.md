@@ -38,7 +38,7 @@ The result should be a usable prototype with stated simulation limits. A success
 
 ## 2. Explore concepts, then choose
 
-`ui-design-brainstorm` requires native image generation in the agent environment. It does not fall back to an API key or another provider. If that capability is unavailable, it can prepare a written brief but must report the image stage as blocked. Native generation does not imply free or unlimited usage.
+`ui-design-brainstorm` needs an image tool: the host's own, or Codex's built-in tool reached through the `codex` CLI when the host has none. It never asks for an API key and does not switch providers silently. With neither available, it prepares a written brief and reports the image stage as blocked. Generation is not free or unlimited; through the Codex CLI it counts against your ChatGPT plan.
 
 ```text
 Use $ui-design-brainstorm to explore the visual style of Alder,
@@ -107,3 +107,23 @@ and a suggested correction. This pass is critique only; do not edit files.
 ```
 
 To authorize a subsequent refinement, follow with: “Apply findings 1 and 2 to the Library screen. Preserve the remaining design and behavior, inspect the affected views, and report what changed and what you verified.” A narrow change does not require a new concept exploration or an unrelated full-app test suite.
+
+## 5. Leave the direction open and choose from three
+
+When you have no look in mind, say so. The skill deals three directions, shows each as a static study, and stops:
+
+```text
+Use $design-artifact-studio for Alder's library screen. The visual
+direction is open and I will choose it. Show me three directions for
+the screen with the three fictional notes from example 1, all
+discussion markers off. Do not build the working prototype yet.
+```
+
+Each direction comes with the values it was dealt, what the agent supplied from the subject's own world for the open positions, and one line on what it gains and risks. Reply with a choice, a combination, a redirect, or “deal again”. Then authorize the build:
+
+```text
+I choose direction 2. Build the working prototype from that study in
+outputs/alder-prototype/, with the interactions from example 1.
+```
+
+The build starts from the chosen study and reports where the working result departs from it. To skip the round, ask for one quick result or name the direction yourself.
