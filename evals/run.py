@@ -372,6 +372,10 @@ def run_agent(command: list[str], run_dir: Path, log: Path, timeout: int, errors
             code = None
     stop.set()
     worker.join(timeout=5)
+    # shot.sh sends every render to a queue it finds, so none may outlive the runner that serves it
+    for leftover in queue.iterdir():
+        leftover.unlink()
+    queue.rmdir()
     return code, int(time.time() - started)
 
 

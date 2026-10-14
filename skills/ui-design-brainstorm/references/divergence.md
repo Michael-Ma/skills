@@ -60,4 +60,4 @@ Reading a deal:
 
 When nobody is available to choose, as in an unattended run, deal as above, build the direction that best serves the scene, and record that the choice was yours.
 
-Skip this for refinements, extensions of an existing system, briefs that already fix the direction, and requests for one quick result. In the last case, say that a direction round is available.
+Skip this for refinements, extensions of an existing system, briefs that already fix the direction, and requests for a single result, such as "just build it", a quick demo or a deadline. In the last case, build one direction and say in one line that a direction round is available.

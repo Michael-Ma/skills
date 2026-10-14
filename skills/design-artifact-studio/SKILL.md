@@ -36,9 +36,16 @@ When choosing an original direction or translating supplied visual references, r
 
 When the work starts from a ui-design-brainstorm handoff, read `HANDOFF.md` and inspect its linked image before choosing anything. Its status says whether a person selected the concept, and its build request says what is authorized; without a build request, ask before building. Treat the image in the role the handoff gives it. Requirements and the person's stated decisions outrank painted details: the handoff's Correct list is binding, and its Resolve list names what you decide or ask.
 
-When the visual direction itself is open, with no existing system, selected concept or supplied target, run the direction round in [references/divergence.md](references/divergence.md) before building: three dealt directions, shown as static studies, then the person's choice. For a screen inside a product, two keep the layout the category's products share and one is a stretch, all in the category's own surface. A model's first direction, and its own choice of alternatives, repeat from brief to brief; the deal is what makes the options worth choosing between.
+Run the direction round in [references/divergence.md](references/divergence.md) before building when all of these hold:
 
-Explore only choices that are open. When the user requests alternatives, produce two or three small visual directions using representative content and the allowed dimensions of change. Structural exploration may vary reading order or task organization; a styling study may deliberately hold both fixed. Otherwise select and briefly explain a suitable direction without manufacturing alternatives for a settled design.
+- The look is open: no existing system, selected concept or supplied target fixes it.
+- The work is a new surface whose look matters, such as a new product's screens, a landing page or a brand surface. A component, a tweak, or a page added to an existing app does not qualify.
+- A person will see the options and choose.
+- They have not asked for a single result: "just build it", a quick demo, a prototype to use now, or a deadline.
+
+The round deals three directions, shows them as static studies, and stops for the person's choice. For a screen inside a product, two keep the layout the category's products share and one is a stretch, all in the category's own surface. A model's first direction, and its own choice of alternatives, repeat from brief to brief; the deal is what makes the options worth choosing between. When the person asked for something built rather than for options, say in one line at the start that you will show three directions first, and that asking for a single result skips them.
+
+When any condition fails, choose one direction with reasons and build it, and say in one line that a direction round is available. When the direction is settled but the person asks for alternatives on part of it, such as the styling of an approved layout or one component, produce two or three small studies that vary only that part, with representative content, and say they were chosen rather than dealt. Do not manufacture alternatives for a settled design.
 
 State the selected direction in concrete terms: what takes visual priority, how information is organized, what gives it character, and why this serves the audience. Design around actual content early. A familiar convention is valid when it makes the task easier. A surprising treatment must earn its cost in comprehension.
 
