@@ -14,7 +14,7 @@ NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 MARKDOWN_LINK = re.compile(r"\]\((<[^>]+>|[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 # Carried by more than one skill so that each installs on its own; the copies must not drift.
 SHARED = ("references/divergence.md", "scripts/draw_axes.py")
-TABLE_ROW = re.compile(r"^\| ([^|]+?) \| ([^|]+?) \| ([^|]+?) \|$", re.MULTILINE)
+TABLE_ROW = re.compile(r"^\| ([^|]+?) \| ([^|]+?) \|$", re.MULTILINE)
 
 
 def check_shared(root: Path) -> list[str]:
@@ -25,6 +25,13 @@ def check_shared(root: Path) -> list[str]:
             listed = ", ".join(str(copy.relative_to(root)) for copy in copies)
             errors.append(f"{name}: copies differ: {listed}")
     return errors
+
+
+def deck_table(text: str, deck: str) -> dict[str, list[str]]:
+    """The rows of divergence.md's table for one deck: axis -> listed values."""
+    match = re.search(rf"^\| Axis \| {deck.capitalize()} deck \|\n\|[-|]+\|\n((?:\|.*\|\n?)+)", text, re.MULTILINE)
+    rows = TABLE_ROW.findall(match.group(1)) if match else []
+    return {axis: [value.strip() for value in column.split(" · ")] for axis, column in rows}
 
 
 def check_deal(root: Path, seeds: int = 200) -> list[str]:
@@ -40,14 +47,20 @@ def check_deal(root: Path, seeds: int = 200) -> list[str]:
         except Exception as exc:
             errors.append(f"{relative}: does not load: {exc}")
             continue
-        for deck in module.DECKS:
+        for deck, axes in module.DECKS.items():
+            grounded = deck in module.GROUNDED_DECKS
+
+            def allowed(axis: str, value: str) -> bool:
+                return value in axes[axis] or (grounded and axis == module.STRUCTURE and value == module.USUAL)
+
             for seed in range(seeds):
+                usual = module.STRUCTURES[seed % len(module.STRUCTURES)] if grounded else None
                 rng = random.Random(seed)
-                sets = module.deal(rng, deck)
-                cards = [(axis, f"sample {n}") for n, axis in enumerate(list(module.AXES)[: seed % 6])]
-                marked = module.place_subject(sets, cards, rng)
+                sets = module.deal(rng, deck, usual)
+                cards = [(axis, f"sample {n}") for n, axis in enumerate(module.card_axes(deck)[: seed % 6])]
+                marked = module.place_subject(sets, cards, rng, deck)
                 again = random.Random(seed)
-                if module.place_subject(module.deal(again, deck), cards, again) != marked:
+                if module.place_subject(module.deal(again, deck, usual), cards, again, deck) != marked:
                     errors.append(f"{relative}: {deck} seed {seed} does not repeat its deal")
                     break
                 if any(module.shared(a, b) > module.MAX_SHARED for a, b in itertools.combinations(sets, 2)):
@@ -56,28 +69,45 @@ def check_deal(root: Path, seeds: int = 200) -> list[str]:
                 if any(len({values[axis] for values in sets}) < len(sets) for axis in module.DISTINCT_AXES[deck]):
                     errors.append(f"{relative}: {deck} seed {seed} repeats a value on an axis that must differ")
                     break
-                if any(values[axis] not in module.DECKS[deck][axis] for values in sets for axis in values):
+                if any(list(values) != list(axes) or not all(allowed(axis, values[axis]) for axis in values) for values in sets):
                     errors.append(f"{relative}: {deck} seed {seed} deals a value from outside its deck")
                     break
+                if grounded:
+                    stretches = [values[module.STRUCTURE] for values in sets if values[module.STRUCTURE] != module.USUAL]
+                    printed = module.describe(seed, cards, deck, usual)
+                    if len(stretches) != 1 or stretches[0] == usual or printed.count("(stretch)") != 1:
+                        errors.append(f"{relative}: {deck} seed {seed} does not keep the usual layout in two sets "
+                                      "and deal one stretch a different structure")
+                        break
                 changed = [[axis for axis in values if values[axis] != before[axis]] for before, values in zip(sets, marked)]
-                placed = [(axis, values[axis]) for values, axes in zip(marked, changed) for axis in axes]
+                placed = [(axis, values[axis]) for values, axes_changed in zip(marked, changed) for axis in axes_changed]
                 dealt_cards = [(axis, value[len(module.CARD):]) for axis, value in placed if value.startswith(module.CARD)]
                 opens = [axis for axis, value in placed if value == module.OPEN]
-                one_each = all(len(axes) == 1 for axes in changed)
+                one_each = all(len(axes_changed) == 1 for axes_changed in changed)
                 cards_first = len(dealt_cards) == min(len(cards), len(sets)) and len(set(dealt_cards)) == len(dealt_cards)
-                valid = all(card in cards for card in dealt_cards) and all(axis in module.OPEN_AXES for axis in opens)
+                valid = all(card in cards for card in dealt_cards) and all(axis in module.OPEN_AXES[deck] for axis in opens)
                 if not (one_each and cards_first and valid and len(dealt_cards) + len(opens) == len(sets)):
                     errors.append(f"{relative}: {deck} seed {seed} does not give each set one card or open position")
                     break
+            if grounded:
+                try:
+                    module.parse_card(f"{module.STRUCTURE}=sample", deck)
+                    errors.append(f"{relative}: the {deck} deck accepts a card on structure")
+                except ValueError:
+                    pass
         guide = script.parent.parent / "references" / "divergence.md"
         if not guide.exists():
             errors.append(f"{relative}: no references/divergence.md beside it")
             continue
-        rows = {axis: (product, expressive) for axis, product, expressive in TABLE_ROW.findall(guide.read_text(encoding="utf-8"))}
-        for axis in module.AXES:
-            listed = [[value.strip() for value in column.split(" · ")] for column in rows.get(axis, ("", ""))]
-            if listed != [module.DECKS["product"][axis], module.DECKS["expressive"][axis]]:
-                errors.append(f"{guide.relative_to(root)}: table row \"{axis}\" differs from {relative.name}")
+        text = guide.read_text(encoding="utf-8")
+        for deck, axes in module.DECKS.items():
+            listed = deck_table(text, deck)
+            if not listed:
+                errors.append(f"{guide.relative_to(root)}: no table for the {deck} deck")
+                continue
+            for axis in sorted(set(axes) | set(listed)):
+                if listed.get(axis) != axes.get(axis):
+                    errors.append(f"{guide.relative_to(root)}: {deck} deck row \"{axis}\" differs from {relative.name}")
     return errors
 
 

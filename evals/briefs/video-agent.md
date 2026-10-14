@@ -14,6 +14,8 @@ Business objective: the team turns each webinar into five clips a week. It wants
 
 What these producers already use every day: the timeline of a desktop video editor, and the preview in their phone's Instagram app.
 
+Products in this category: Frame.io, Descript, Opus Clip, CapCut.
+
 Content (fictional; use exactly, and do not add data):
 - Workspace: Fernway Outdoor, marketing. 3 drafts are waiting for review. This one has waited 12 minutes.
 - Source: webinar recording "Packing light for a 3-day hike", 47:12 long, with two speakers: Mira Osei (host) and Daniel Kraus (guest, gear designer).
@@ -32,5 +34,6 @@ Content (fictional; use exactly, and do not add data):
 - Run facts: started 10:14, 3 minutes 52 seconds of work, 1 render.
 - Reviewer actions: approve and export; change a cut; edit the captions; send back with a note; open in the editor and take over.
 - No video, stills or photography are supplied and none may be faked. Show the preview and frames as labelled placeholders with their timecodes. Do not invent view counts, engagement figures, model names or other drafts' details.
+- Standard app chrome that carries no data of its own is expected, as on any shipped screen: the app's navigation, playback controls, timeline zoom, panel tabs.
 
 Representative state for every study: the draft is ready, playback is paused at 0:00, and nothing is decided yet.

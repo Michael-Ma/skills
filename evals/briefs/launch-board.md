@@ -14,6 +14,8 @@ Business objective: no slot offered that the shop rule forbids, and no customer 
 
 What these staff already read every day: the printed tide table, the harbour's signal flags, and the departure board at the ferry terminal next door.
 
+Products in this category: FareHarbor, Rezdy, Windy.
+
 Fixture data (fictional; use exactly):
 - Date: Saturday 14 October. Sunrise 07:31, sunset 18:12.
 - Tides: Low 05:48 (0.6 m), High 12:03 (3.9 m), Low 18:21 (0.8 m).
@@ -22,6 +24,6 @@ Fixture data (fictional; use exactly):
 - Slots: 08:00–10:00, 10:00–12:00, 12:00–14:00, 14:00–16:00, 16:00–18:00.
 - Boats available: 9 singles, 4 doubles. Bookings so far: 08:00 slot → 2 singles; 10:00 slot → 5 singles, 2 doubles; 12:00 slot → 3 singles.
 
-Each slot shows its tide state, the wind during the slot, whether the shop rule allows it, and its Open/Closed status with the way to change it. Do not invent customer reviews, live weather feeds, or metrics.
+Each slot shows its tide state, the wind during the slot, whether the shop rule allows it, and its Open/Closed status with the way to change it. Do not invent customer reviews, live weather feeds, or metrics. Standard app chrome that carries no data of its own is expected, as on any shipped screen.
 
 Representative state for every study: 08:00–10:00 and 10:00–12:00 are open; 12:00–14:00 has just been closed for wind, showing its read-back reason, and its 3 booked singles need contacting; 14:00–16:00 and 16:00–18:00 are flagged by the shop rule and still open, awaiting a decision.

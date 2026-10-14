@@ -10,11 +10,11 @@ The five briefs cover different kinds of surface:
 |---|---|---|
 | `video-agent` | Reviewing an AI video agent's draft clip before export | Desktop 1440×900 |
 | `b2b-order-guide` | A restaurant's late-night order in a wholesale distributor's portal | Laptop 1280×800 |
-| `train-tickets` | Choosing a train and fare in a consumer ticket app | Phone 390 wide |
+| `train-tickets` | Choosing a train in a consumer ticket app | Phone 390 wide |
 | `launch-board` | Deciding which rental slots to offer, at a counter in daylight | Tablet 1180×820 |
 | `landing` | A service's landing page, read by a wary office manager | Desktop 1440 wide |
 
-The skill should deal the first four from its product deck and may choose the expressive deck for `landing`, a brand-led page. `deal.txt` records which deck it used.
+The skill should deal the first four from its product deck and may choose the expressive deck for `landing`, a brand-led page. `deal.txt` records which deck it used. In the product deck two directions keep the category's usual layout and the third is a stretch; the sheet marks the stretch. Each brief names a few real products in its category, and the agent may search the web to look at them before dealing (Codex runs with `--search`, Claude with `WebSearch` and `WebFetch`).
 
 ## Run
 
@@ -53,7 +53,8 @@ python3 evals/run.py check /path/to/folder --brief video-agent --runner codex-ap
 The script checks only what a script can:
 
 - **files**: three studies, `DESIGN.md` and `deal.txt` exist.
-- **deal**: every deal recorded in `deal.txt` is exactly what `draw_axes.py` prints for the seed and cards it names. A deal written by hand, or sets edited after the fact, fail here. So does a deal made with an earlier version of the script, since a seed reproduces only under the version that dealt it.
+- **deal**: every deal recorded in `deal.txt` is exactly what `draw_axes.py` prints for the seed, deck, usual structure and cards it names. A deal written by hand, or sets edited after the fact, fail here. So does a deal made with an earlier version of the script, since a seed reproduces only under the version that dealt it.
+- **calibration**: `DESIGN.md` names at least one of the products on the brief's "Products in this category" line.
 - **content**: each study contains the strings listed in the brief's `must_contain`.
 - **self-contained**: a study loads nothing from outside except Google Fonts.
 - **renders**: each study renders at the brief's size.
@@ -72,7 +73,7 @@ This puts the directions from several runs on one sheet. With `--blind` they are
 
 - A direction round takes an agent roughly twenty to thirty minutes per brief. Codex runs count against your ChatGPT plan and Claude runs against your Claude plan.
 - Codex runs in its `workspace-write` sandbox, where Chrome cannot start. The agent still gets to look at its work: `tools/shot.sh` leaves a request in the run folder's `.render-queue`, and `run.py`, outside the sandbox, renders it and writes the image back. The runner renders only files inside that run folder.
-- The Claude runner allows shell commands and file edits without asking (`--permission-mode acceptEdits` with `Bash`, `Read`, `Write`, `Edit`, `Glob` and `Grep`). Run only briefs you trust.
+- The Claude runner allows shell commands, file edits and web lookups without asking (`--permission-mode acceptEdits` with `Bash`, `Read`, `Write`, `Edit`, `Glob`, `Grep`, `WebSearch` and `WebFetch`). Codex runs with live web search. Run only briefs you trust.
 - The agent is told to use the skill copy in this repository and to ignore any installed copy. An installed older copy with the same name can still be picked up by the CLI; check `agent.log` if a result looks like the old behavior.
 
 ## Add a brief
@@ -88,7 +89,7 @@ height: 900
 frame: Each study must show the clip preview, the edit timeline, both points of uncertainty and the reviewer actions within one 1440×900 view.
 must_contain: Daniel Kraus | merino | 14:18
 ---
-(product, audience and scene, business objective, what the audience already uses, exact content, representative state)
+(product, audience and scene, business objective, what the audience already uses, products in this category, exact content, representative state)
 ```
 
-`width` and `height` are the size each study is rendered at. `frame` is the sentence that tells the agent what must fit in that frame. `must_contain` lists exact strings, separated by `|`, that every study has to show. State a business objective, the scene of use and what the audience already uses: the skill writes its subject cards from those. Keep everything fictional.
+`width` and `height` are the size each study is rendered at. `frame` is the sentence that tells the agent what must fit in that frame. `must_contain` lists exact strings, separated by `|`, that every study has to show. State a business objective, the scene of use and what the audience already uses: the skill writes its subject cards from those. Add a line `Products in this category: A, B, C` naming real products that present the same screen; the skill calibrates against them, and the calibration check looks for them in `DESIGN.md`. Say that standard app chrome is allowed, or "do not add data" can read as forbidding a navigation bar. Keep the product and its content fictional.

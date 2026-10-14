@@ -14,6 +14,8 @@ Business objective: more visit-day requests from office managers. The commonest 
 
 What these managers already book for the office: window cleaners, fruit deliveries and fire-alarm tests.
 
+Products in this category: the websites of services that come to an office, such as fruit delivery, window cleaning and on-site bike repair.
+
 Content (fictional; use exactly, and do not add claims):
 - What it is: a workshop van that parks at your office for a day and services staff bikes while they work.
 - How it works, in order: 1. Pick a day; a visit needs at least 6 bikes booked. 2. Staff book a slot and hand their keys in at the van. 3. Bikes are back in the rack by 5 pm.

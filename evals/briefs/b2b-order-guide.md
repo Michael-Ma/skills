@@ -14,6 +14,8 @@ Business objective: more orders placed in the portal before the cut-off. Today a
 
 What these kitchen managers already use every day: a printed par sheet on a clipboard, and a chat thread with their sales rep.
 
+Products in this category: Sysco Shop, US Foods MOXe, Bidfood Direct, Choco, Pepper.
+
 Content (fictional; use exactly, and do not add data):
 - Account: Osteria Lume. Delivery: Wednesday 15 May, before 07:00. Cut-off: 23:59 tonight. Order minimum: £250.
 - Credit: £1,840 of £3,000 used. This order would bring it to £2,164.50.
@@ -29,5 +31,6 @@ Content (fictional; use exactly, and do not add data):
 - Order total so far: £324.50, from items 1, 2, 3, 5 and 6. The minimum is met.
 - Actions: change a quantity; accept or decline the substitution; add a note for the driver; submit the order.
 - Do not invent other items, promotions, ratings, delivery tracking or metrics. No photography is supplied and none may be faked.
+- Standard portal chrome that carries no data of its own is expected, as on any shipped screen: the distributor's navigation, a product search field, the account menu, sort controls, and grouping these items by storage area or category.
 
 Representative state for every study: 22:30, the cart as listed, the substitution not yet decided, the order not yet submitted.

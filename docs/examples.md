@@ -120,7 +120,7 @@ the screen with the three fictional notes from example 1, all
 discussion markers off. Do not build the working prototype yet.
 ```
 
-Each direction comes with the values it was dealt, the card it carries and where that card came from, and one line on what it gains and risks. Stating an objective, a scene of use or comparable products gives the agent more to write cards from. Reply with a choice, a combination, a redirect, a card to add or strike, or “deal again”. Then authorize the build:
+The agent first notes how two or three note-taking apps lay out a library screen. Two directions keep that layout and the third, marked as the stretch, tries a different structure. Each comes with the values it was dealt, the card it carries and where that card came from, and one line on what it gains and risks. Stating an objective, a scene of use or comparable products gives the agent more to write cards from. Reply with a choice, a combination, a redirect, a card to add or strike, or “deal again”. Then authorize the build:
 
 ```text
 I choose direction 2. Build the working prototype from that study in

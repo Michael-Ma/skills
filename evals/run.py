@@ -78,13 +78,13 @@ Brief:
 
 {brief.body}
 
-What I want now: the visual direction is open and I will choose it. Do not build a working prototype yet. Show me three distinct visual directions so I can pick one, with the same content and state in all three.
+What I want now: the visual direction is open and I will choose it. Do not build a working prototype yet. Show me three distinct visual directions so I can pick one, with the same content and state in all three. You may search the web to look at how the products in this category present this screen.
 
 Deliver, inside {run_dir}:
-- direction-1.html, direction-2.html, direction-3.html: static studies for a {brief.width}px-wide window, each self-contained (embedded CSS; Google Fonts links allowed with a system-font fallback), no behavior needed. {brief.frame}
+- direction-1.html, direction-2.html, direction-3.html: static studies of the deal's Directions 1, 2 and 3, for a {brief.width}px-wide window, each self-contained (embedded CSS; Google Fonts links allowed with a system-font fallback), no behavior needed. {brief.frame}
 - renders/direction-1.png, direction-2.png, direction-3.png: final renders of each at {brief.width}x{brief.height}.
 - deal.txt: what the skill's deal script printed, unedited. If you deal more than once, keep every output in order.
-- DESIGN.md: the record the skill asks for.
+- DESIGN.md: the record the skill asks for, including the products you calibrated against and the three skeleton sketches.
 
 Rendering. A renderer is available and is the only one you may use:
 sh {SHOT} <absolute path to .html> <absolute path to out.png> [width] [height] [gray:]
@@ -92,16 +92,18 @@ It writes a PNG that you can open and look at, and can take up to a minute per i
 
 Constraints: write only inside {run_dir}. Use fictional names only.
 
-When done, reply with: the default you set aside, in one line; the seed; the cards you wrote and where each came from; then for each direction its name, the values it was dealt, the card it carries, anything redrawn, and its gain and risk in one sentence."""
+When done, reply with: the default you set aside, in one line; the products you calibrated against, and whether you inspected them or worked from memory; the seed; the cards you wrote and where each came from; then for each direction its name, whether it is the stretch, the values it was dealt, the card it carries, anything redrawn, and its gain and risk in one sentence."""
 
 
 def runner_command(runner: str, prompt: str, run_dir: Path, sandbox: str, model: str | None) -> list[str]:
     if runner == "codex":
-        command = ["codex", "exec", "--skip-git-repo-check", "-C", str(run_dir), "-s", sandbox,
+        # --search is a top-level flag: it lets the agent look at the category's products while calibrating
+        command = ["codex", "--search", "exec", "--skip-git-repo-check", "-C", str(run_dir), "-s", sandbox,
                    "-o", str(run_dir / "_eval" / "last-message.txt")]
         return command + (["-m", model] if model else []) + [prompt]
     command = ["claude", "-p", prompt, "--output-format", "json", "--permission-mode", "acceptEdits",
-               "--allowedTools", "Bash", "Read", "Write", "Edit", "Glob", "Grep", "--add-dir", str(ROOT)]
+               "--allowedTools", "Bash", "Read", "Write", "Edit", "Glob", "Grep", "WebSearch", "WebFetch",
+               "--add-dir", str(ROOT)]
     return command + (["--model", model] if model else [])
 
 
@@ -158,20 +160,51 @@ def check_deal(record: str, deal) -> tuple[bool, str]:
     for block in blocks:
         lines = [line.rstrip() for line in block.strip().splitlines()]
         seed = int(lines[0].split()[1])
-        try:
-            cards = [deal.parse_card(line[len("card: "):]) for line in lines if line.startswith("card: ")]
-        except ValueError as error:
-            return False, f"seed {seed}: {error}"
         deck = next((line.split(": ", 1)[1].strip() for line in lines if line.startswith("deck: ")), None)
         if deck not in getattr(deal, "DECKS", {}):
             return False, f"seed {seed}: no known deck recorded"
-        expected = deal.describe(seed, cards, deck).splitlines()
+        usual = next((line.split(": ", 1)[1].strip() for line in lines if line.startswith("usual: ")), None)
+        try:
+            cards = [deal.parse_card(line[len("card: "):], deck) for line in lines if line.startswith("card: ")]
+        except ValueError as error:
+            return False, f"seed {seed}: {error}"
+        expected = deal.describe(seed, cards, deck, usual).splitlines()
         if lines[: len(expected)] != expected:
             return False, (f"seed {seed}: the recorded sets are not what the script deals for that seed and those cards "
                            "(or draw_axes.py has changed since that deal)")
     last = blocks[-1].strip().splitlines()
     deck = next((l.split(": ", 1)[1].strip() for l in last if l.startswith("deck: ")), "?")
     return True, f"{len(blocks)} deal(s) reproduce; last is {last[0]}, {deck} deck, {sum(l.startswith('card: ') for l in last)} cards"
+
+
+def last_deal(run_dir: Path) -> list[str]:
+    record = run_dir / "deal.txt"
+    blocks = re.split(r"(?m)^(?=seed \d+\s*$)", record.read_text(encoding="utf-8")) if record.is_file() else []
+    return blocks[-1].splitlines() if blocks else []
+
+
+def stretch_direction(run_dir: Path) -> int | None:
+    """The direction the last deal marked as the stretch, if any."""
+    found = [re.match(r"Direction (\d+) \(stretch\)", line) for line in last_deal(run_dir)]
+    return next((int(match.group(1)) for match in found if match), None)
+
+
+def listed_products(brief: Brief) -> list[str]:
+    """Products the brief names on its "Products in this category:" line."""
+    line = re.search(r"(?m)^Products in this category[^:]*:(.+)$", brief.body)
+    if not line:
+        return []
+    names = re.split(r",|;|\band\b|\bor\b", re.sub(r"\([^)]*\)|such as", ",", line.group(1)))
+    return [name.strip(" .") for name in names if name.strip(" .") and name.strip(" .")[0].isupper()]
+
+
+def check_record(record: str, brief: Brief) -> tuple[bool, str]:
+    """DESIGN.md names at least one of the products the brief lists, so calibration happened against them."""
+    products = listed_products(brief)
+    if not products:
+        return True, "the brief lists no products"
+    named = [product for product in products if product.casefold() in record.casefold()]
+    return bool(named), ("names " + ", ".join(named)) if named else "names none of: " + ", ".join(products)
 
 
 def plain(markup: str) -> str:
@@ -204,6 +237,9 @@ def run_checks(brief: Brief, run_dir: Path) -> list[dict]:
     deal_file = run_dir / "deal.txt"
     record("deal", *(check_deal(deal_file.read_text(encoding="utf-8"), load_deal()) if deal_file.is_file()
                      else (False, "no deal.txt")))
+    design = run_dir / "DESIGN.md"
+    if design.is_file():
+        record("calibration", *check_record(design.read_text(encoding="utf-8", errors="replace"), brief))
 
     for n in DIRECTIONS:
         study = run_dir / f"direction-{n}.html"
@@ -353,8 +389,9 @@ def assess(brief: Brief, run_dir: Path, facts: dict) -> bool:
     """Check a finished folder, render its sheet, write result.json and report. True when every check passes."""
     (run_dir / "_eval").mkdir(parents=True, exist_ok=True)
     checks = run_checks(brief, run_dir)
-    rendered = [(f"{brief.id} {n}", f"direction-{n}.png", brief.width) for n in DIRECTIONS
-                if (run_dir / "_eval" / f"direction-{n}.png").is_file()]
+    stretch = stretch_direction(run_dir)
+    rendered = [(f"{brief.id} {n}" + (" · stretch" if n == stretch else ""), f"direction-{n}.png", brief.width)
+                for n in DIRECTIONS if (run_dir / "_eval" / f"direction-{n}.png").is_file()]
     sheet = bool(rendered) and write_sheet(run_dir / "_eval", f"{brief.title} · {facts['runner']}", rendered, brief.height)[0]
     result = {"brief": brief.id, **facts, "checks": checks}
     (run_dir / "_eval" / "result.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -389,10 +426,11 @@ def command_compare(args: argparse.Namespace) -> int:
     for folder in (Path(path).resolve() for path in args.runs):
         result = json.loads((folder / "_eval" / "result.json").read_text(encoding="utf-8"))
         brief = parse_brief((EVALS / "briefs" / f"{result['brief']}.md").read_text(encoding="utf-8"))
+        stretch = stretch_direction(folder)
         for n in DIRECTIONS:
             image = folder / "_eval" / f"direction-{n}.png"
             if image.is_file():
-                entries.append((f"{folder.parent.name}/{folder.name} direction {n}", image, brief))
+                entries.append((f"{folder.parent.name}/{folder.name} direction {n}" + (" · stretch" if n == stretch else ""), image, brief))
     if not entries:
         raise SystemExit("no rendered directions found in those folders")
     out = Path(args.out).resolve() / ("compare-" + datetime.now().strftime("%Y%m%d-%H%M%S"))
@@ -401,8 +439,8 @@ def command_compare(args: argparse.Namespace) -> int:
         random.shuffle(entries)
     items, mapping = [], []
     for index, (source, image, brief) in enumerate(entries):
-        label = chr(ord("A") + index) if args.blind else source
-        copy = out / f"{label.replace('/', '_').replace(' ', '-')}.png"
+        label = (chr(ord("A") + index) + (" · stretch" if source.endswith(" · stretch") else "")) if args.blind else source
+        copy = out / f"{label.replace(' · ', '-').replace('/', '_').replace(' ', '-')}.png"
         copy.write_bytes(image.read_bytes())
         items.append((label, copy.name, brief.width))
         mapping.append(f"{label} = {source}")
