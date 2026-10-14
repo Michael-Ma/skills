@@ -100,7 +100,7 @@ def runner_command(runner: str, prompt: str, run_dir: Path, sandbox: str, model:
         command = ["codex", "exec", "--skip-git-repo-check", "-C", str(run_dir), "-s", sandbox,
                    "-o", str(run_dir / "_eval" / "last-message.txt")]
         return command + (["-m", model] if model else []) + [prompt]
-    command = ["claude", "-p", prompt, "--permission-mode", "acceptEdits",
+    command = ["claude", "-p", prompt, "--output-format", "json", "--permission-mode", "acceptEdits",
                "--allowedTools", "Bash", "Read", "Write", "Edit", "Glob", "Grep", "--add-dir", str(ROOT)]
     return command + (["--model", model] if model else [])
 
@@ -262,15 +262,43 @@ def load_briefs(names: list[str], everything: bool) -> list[Brief]:
     return briefs
 
 
-def run_agent(command: list[str], run_dir: Path, log: Path, timeout: int) -> tuple[int | None, int]:
+def usage_facts(runner: str, log: str) -> dict:
+    """Model, tokens and cost as the CLI reports them; None where it reports nothing."""
+    if runner == "codex":
+        model = re.search(r"(?m)^model: (.+)$", log)
+        tokens = re.search(r"tokens used\s*\n\s*([\d,]+)", log)
+        return {"model": model.group(1).strip() if model else None,
+                "tokens": int(tokens.group(1).replace(",", "")) if tokens else None}
+    try:
+        report = json.loads(log)
+    except ValueError:
+        return {"model": None}
+    usage = report.get("usage") or {}
+    return {"model": ", ".join(report.get("modelUsage") or {}) or None,
+            "tokens": sum(usage.get(key) or 0 for key in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens")) or None,
+            "cost_usd": report.get("total_cost_usd"), "turns": report.get("num_turns"),
+            "agent_error": report.get("is_error"), "permission_denials": len(report.get("permission_denials") or [])}
+
+
+def final_reply(runner: str, log: str) -> str:
+    if runner == "claude":
+        try:
+            return str(json.loads(log).get("result", ""))
+        except ValueError:
+            return log
+    return log
+
+
+def run_agent(command: list[str], run_dir: Path, log: Path, timeout: int, errors: Path | None = None) -> tuple[int | None, int]:
     stop = threading.Event()
     queue = run_dir / ".render-queue"
     queue.mkdir(exist_ok=True)
     worker = threading.Thread(target=serve_render_queue, args=(queue, run_dir, stop), daemon=True)
     worker.start()
     started = time.time()
-    with log.open("w", encoding="utf-8") as output:
-        process = subprocess.Popen(command, cwd=run_dir, stdin=subprocess.DEVNULL, stdout=output, stderr=subprocess.STDOUT)
+    with log.open("w", encoding="utf-8") as output, (errors.open("w", encoding="utf-8") if errors else open(os.devnull, "w")) as error:
+        process = subprocess.Popen(command, cwd=run_dir, stdin=subprocess.DEVNULL, stdout=output,
+                                   stderr=error if errors else subprocess.STDOUT)
         try:
             code = process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -300,15 +328,19 @@ def command_run(args: argparse.Namespace) -> int:
         (run_dir / "_eval" / "prompt.txt").write_text(prompt + "\n", encoding="utf-8")
         log = run_dir / "_eval" / "agent.log"
         print(f"{brief.id}: running {args.runner} in {run_dir}", flush=True)
-        code, seconds = run_agent(command, run_dir, log, args.timeout)
-        if args.runner == "claude":
-            (run_dir / "_eval" / "last-message.txt").write_text(log.read_text(encoding="utf-8"), encoding="utf-8")
+        # Claude's stdout is one JSON report; its warnings go to agent.err so they stay out of the reply
+        errors = run_dir / "_eval" / "agent.err" if args.runner == "claude" else None
+        code, seconds = run_agent(command, run_dir, log, args.timeout, errors)
         text = log.read_text(encoding="utf-8", errors="replace")
-        model = re.search(r"(?m)^model: (.+)$", text)
+        if args.runner == "claude":
+            (run_dir / "_eval" / "last-message.txt").write_text(final_reply("claude", text) + "\n", encoding="utf-8")
         if code != 0:
-            print("  the agent did not finish cleanly; its log ends:\n    " + "\n    ".join(text.strip().splitlines()[-4:]))
-        passed = assess(brief, run_dir, {"runner": args.runner, "model": args.model or (model.group(1).strip() if model else None),
-                                         "exit": code, "seconds": seconds, "timed_out": code is None})
+            tail = (errors.read_text(encoding="utf-8", errors="replace") if errors else "") + text
+            print("  the agent did not finish cleanly; its output ends:\n    " + "\n    ".join(tail.strip().splitlines()[-4:]))
+        facts = {"runner": args.runner, "exit": code, "seconds": seconds, "timed_out": code is None, **usage_facts(args.runner, text)}
+        if args.model and not facts.get("model"):
+            facts["model"] = args.model
+        passed = assess(brief, run_dir, facts)
         failed = failed or code != 0 or not passed
     return 1 if failed else 0
 
@@ -323,8 +355,12 @@ def assess(brief: Brief, run_dir: Path, facts: dict) -> bool:
     result = {"brief": brief.id, **facts, "checks": checks}
     (run_dir / "_eval" / "result.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     passed = all(check["ok"] for check in checks)
-    print(f"{brief.id}: {'checks pass' if passed else 'CHECKS FAIL'}"
-          + (f", exit {facts['exit']}, {facts['seconds']}s" if "seconds" in facts else ""))
+    spent = ", ".join(part for part in (
+        f"exit {facts['exit']}, {facts['seconds']}s" if "seconds" in facts else "",
+        facts.get("model") or "",
+        f"{facts['tokens']:,} tokens" if facts.get("tokens") else "",
+        f"${facts['cost_usd']:.2f}" if facts.get("cost_usd") is not None else "") if part)
+    print(f"{brief.id}: {'checks pass' if passed else 'CHECKS FAIL'}" + (f", {spent}" if spent else ""))
     for check in checks:
         if not check["ok"]:
             print(f"  {check['check']}: {check['detail']}")

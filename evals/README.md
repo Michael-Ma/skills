@@ -20,8 +20,8 @@ Each brief gets a folder, `evals/out/<time>-<runner>/<brief>/`, which is ignored
 |---|---|
 | `sheet.png` | The three directions side by side. Start here. |
 | `direction-1.png` … `direction-3.png` | Each study, rendered by the runner at the brief's size |
-| `result.json` | Runner, model, duration, exit status and every check |
-| `agent.log`, `last-message.txt`, `prompt.txt` | What the agent was told, what it printed and its final reply |
+| `result.json` | Runner, model, tokens (and cost, for Claude), duration, exit status and every check |
+| `agent.log`, `agent.err`, `last-message.txt`, `prompt.txt` | What the agent was told, what it printed, its warnings (Claude only) and its final reply |
 
 It needs Python 3.9 or newer, Google Chrome or Chromium, and the chosen CLI installed and logged in. Set `CHROME` to the browser's path if it is not found.
 
