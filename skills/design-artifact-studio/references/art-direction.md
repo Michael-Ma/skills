@@ -26,7 +26,7 @@ Consider these independently instead of treating “premium” as a style:
 - **Tempo:** Does motion explain a transition or compete with a task? Static is often right. When movement matters, preserve access and reduced-motion behavior.
 - **Material:** Does the content need photographs, diagrams, flat color, typography, or an actual product view? Choose subject-relevant material before effects.
 
-When a consequential visual choice is open, use a small direction sketch before polishing. For uncertain composition, compare the same representative content in different structures. For styling alternatives, preserve settled structure and vary the requested qualities. A narrow edit or constrained reconstruction need not invent alternative directions.
+When the whole direction is open and a person will choose it, the alternatives come from the direction round in [divergence.md](divergence.md). For a narrower consequential choice, use a small direction sketch before polishing. For uncertain composition, compare the same representative content in different structures. For styling alternatives, preserve settled structure and vary the requested qualities. A narrow edit or constrained reconstruction need not invent alternative directions.
 
 For reference-led work, compare a rough render with the relevant reference early. Check evidenced proportions and placement for an exact target, consistency for an existing system, and only the selected qualities for inspiration. A content source is not a layout benchmark. Resolve consequential mismatches before polishing components, and check them again in the final review.
 

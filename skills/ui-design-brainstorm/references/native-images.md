@@ -51,7 +51,7 @@ Display the result through the host's supported renderer. Inspect actual images 
 This reaches Codex's built-in image tool from a host that has none. No API key is involved, and usage counts against the person's ChatGPT plan, so make only the calls the budget allows.
 
 1. Save the prompt to a file exactly as it will be submitted, and append the attempt to `run.json` with status `submitted`.
-2. Write an instruction file that starts with `$imagegen`, asks for exactly one image from the prompt between two markers, passed as written, and asks for the reply to be only the absolute path of the PNG:
+2. Write an instruction file that starts with `$imagegen`, asks for exactly one image from the prompt between two markers, passed as written, and asks for the reply to be only the absolute path of the PNG. Write it with a file tool or a quoted heredoc (`<<'EOF'`), so the shell does not expand `$imagegen` to nothing:
 
 ```text
 $imagegen Use the built-in image_gen tool exactly once to generate one landscape image (3:2, or the closest size available) from the prompt between the markers. Pass the prompt as written, without rewriting or summarizing it. Do not run shell commands or edit files. When the image is done, reply with only the absolute path of the generated PNG.
@@ -69,7 +69,9 @@ codex exec --skip-git-repo-check -C "<output folder>" -o "<output folder>/last-m
 
 Add `-i <file>` to attach a reference image, and state its role in the prompt.
 
-4. The image is written under `~/.codex/generated_images/<session id>/`; there is no destination argument. Read the path from `last-message.txt`, confirm the file exists and is new, copy it into the output folder, and keep the original.
+The call often outlasts a shell tool's default time limit: Claude Code's Bash tool stops a command after two minutes unless given a longer timeout. Give the command a limit of ten minutes (`timeout: 600000` in Claude Code), or run it in the background and wait for it to finish. A command that was cut off may still have produced its image.
+
+4. The image is written under `~/.codex/generated_images/<session id>/`; there is no destination argument. Read the path from `last-message.txt`, confirm the file exists and is new, copy it into the output folder, and keep the original. If `last-message.txt` is missing or empty, as after a cut-off command, look for the image with `find ~/.codex/generated_images -name '*.png' -newer "<instruction file>"` before anything else.
 5. Update the attempt with the copied relative path, dimensions and status. Record the driving model named in the log. Record image model, usage and cost as null unless the log reports them.
 
-A call normally takes one to two minutes. Allow five before treating it as stalled, and look for a new image before submitting again. Each call is one attempt against the budget.
+A call normally takes one to two minutes. Allow five before treating it as stalled, and look for a new image with the `find` command above before submitting again. Each call is one attempt against the budget, including one whose command was cut off.
