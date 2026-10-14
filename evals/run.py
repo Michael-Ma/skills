@@ -162,12 +162,16 @@ def check_deal(record: str, deal) -> tuple[bool, str]:
             cards = [deal.parse_card(line[len("card: "):]) for line in lines if line.startswith("card: ")]
         except ValueError as error:
             return False, f"seed {seed}: {error}"
-        expected = deal.describe(seed, cards).splitlines()
+        deck = next((line.split(": ", 1)[1].strip() for line in lines if line.startswith("deck: ")), None)
+        if deck not in getattr(deal, "DECKS", {}):
+            return False, f"seed {seed}: no known deck recorded"
+        expected = deal.describe(seed, cards, deck).splitlines()
         if lines[: len(expected)] != expected:
             return False, (f"seed {seed}: the recorded sets are not what the script deals for that seed and those cards "
                            "(or draw_axes.py has changed since that deal)")
     last = blocks[-1].strip().splitlines()
-    return True, f"{len(blocks)} deal(s) reproduce; last is {last[0]} with {sum(l.startswith('card: ') for l in last)} cards"
+    deck = next((l.split(": ", 1)[1].strip() for l in last if l.startswith("deck: ")), "?")
+    return True, f"{len(blocks)} deal(s) reproduce; last is {last[0]}, {deck} deck, {sum(l.startswith('card: ') for l in last)} cards"
 
 
 def plain(markup: str) -> str:

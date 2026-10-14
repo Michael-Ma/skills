@@ -14,6 +14,8 @@ The five briefs cover different kinds of surface:
 | `launch-board` | Deciding which rental slots to offer, at a counter in daylight | Tablet 1180×820 |
 | `landing` | A service's landing page, read by a wary office manager | Desktop 1440 wide |
 
+The skill should deal the first four from its product deck and may choose the expressive deck for `landing`, a brand-led page. `deal.txt` records which deck it used.
+
 ## Run
 
 ```sh
