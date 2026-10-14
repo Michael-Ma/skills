@@ -34,8 +34,6 @@ ROOT = Path(__file__).resolve().parents[1]
 EVALS = ROOT / "evals"
 SHOT = EVALS / "tools" / "shot.sh"
 SKILL = ROOT / "skills" / "design-artifact-studio"
-sys.path.insert(0, str(EVALS / "tools"))
-import likeness  # noqa: E402  (beside shot.sh, standard library only)
 DIRECTIONS = (1, 2, 3)
 SHEET_IMAGE_WIDTH = 760
 FRAMED_BELOW = 500  # shot.sh frames narrower pages at the left of an image this wide
@@ -90,7 +88,7 @@ Deliver, inside {run_dir}:
 
 Rendering. A renderer is available and is the only one you may use:
 sh {SHOT} <absolute path to .html> <absolute path to out.png> [width] [height] [gray:]
-It writes a PNG that you can open and look at, and can take up to a minute per image. Pass gray: after the height to render the page without color. Widths below {FRAMED_BELOW} are framed at the left of a {FRAMED_BELOW}px-wide image, with grey filling the rest. Do not start servers or use any other browser, preview or screenshot tool.
+It writes a PNG that you can open and look at, and can take up to a minute per image. Pass gray: after the height to render the page without color. Widths below {FRAMED_BELOW} are framed at the left of a {FRAMED_BELOW}px-wide image, with grey filling the rest. When you run the skill's likeness script on these renders, pass --width {brief.width}. Do not start servers or use any other browser, preview or screenshot tool.
 
 Constraints: write only inside {run_dir}. Use fictional names only.
 
@@ -146,12 +144,17 @@ def serve_render_queue(queue: Path, run_dir: Path, stop: threading.Event) -> Non
 
 # --- checks a script can make -----------------------------------------------------------------
 
-def load_deal():
-    spec = importlib.util.spec_from_file_location("draw_axes", SKILL / "scripts" / "draw_axes.py")
+def load_script(name: str):
+    """One of the skill's scripts, loaded as a module without writing bytecode into the skill."""
+    spec = importlib.util.spec_from_file_location(name, SKILL / "scripts" / f"{name}.py")
     module = importlib.util.module_from_spec(spec)
     sys.dont_write_bytecode = True
     spec.loader.exec_module(module)
     return module
+
+
+def load_deal():
+    return load_script("draw_axes")
 
 
 def check_deal(record: str, deal) -> tuple[bool, str]:
@@ -263,7 +266,8 @@ def run_checks(brief: Brief, run_dir: Path) -> list[dict]:
 
 
 def check_distinct(renders: list[Path], width: int) -> tuple[bool, str]:
-    """No two studies read as one layout once color, tone and spacing are set aside."""
+    """No two studies read as one layout once color, tone and spacing are set aside: the skill's own test, rerun."""
+    likeness = load_script("likeness")
     try:
         grids = [likeness.content_grid(render, width) for render in renders]
     except ValueError as error:

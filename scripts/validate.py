@@ -4,7 +4,10 @@ import itertools
 from pathlib import Path
 import random
 import re
+import struct
 import sys
+import tempfile
+import zlib
 from urllib.parse import unquote, urlsplit
 
 import yaml
@@ -13,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 MARKDOWN_LINK = re.compile(r"\]\((<[^>]+>|[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 # Carried by more than one skill so that each installs on its own; the copies must not drift.
-SHARED = ("references/divergence.md", "scripts/draw_axes.py")
+SHARED = ("references/divergence.md", "scripts/draw_axes.py", "scripts/likeness.py")
 TABLE_ROW = re.compile(r"^\| ([^|]+?) \| ([^|]+?) \|$", re.MULTILINE)
 
 
@@ -113,6 +116,47 @@ def check_deal(root: Path, seeds: int = 200) -> list[str]:
     return errors
 
 
+def png(rows: list[list[int]]) -> bytes:
+    """A greyscale picture as an 8-bit RGB PNG, unfiltered."""
+    def chunk(kind: bytes, body: bytes) -> bytes:
+        return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body))
+    raw = b"".join(b"\0" + bytes(v for value in row for v in (value, value, value)) for row in rows)
+    header = struct.pack(">IIBBBBB", len(rows[0]), len(rows), 8, 2, 0, 0, 0)
+    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b"")
+
+
+def check_likeness(root: Path) -> list[str]:
+    """likeness.py reads a PNG, scores a page against itself as one layout and a different arrangement below ALIKE."""
+    errors = []
+    size = 192
+
+    def page(text_at) -> list[list[int]]:
+        # white ground with striped "text" where text_at(x, y) is true
+        return [[0 if text_at(x, y) and y % 6 < 3 else 255 for x in range(size)] for y in range(size * 2)]
+
+    sidebar = page(lambda x, y: x < size // 3 or (x > size // 2 and y < size // 2))
+    banner = page(lambda x, y: y < size // 3 or (x > size // 4 and x < size * 3 // 4 and y > size))
+    for script in sorted((root / "skills").glob("*/scripts/likeness.py")):
+        relative = script.relative_to(root)
+        spec = importlib.util.spec_from_file_location("likeness", script)
+        module = importlib.util.module_from_spec(spec)
+        sys.dont_write_bytecode = True
+        try:
+            spec.loader.exec_module(module)
+            with tempfile.TemporaryDirectory() as folder:
+                first, second = Path(folder) / "a.png", Path(folder) / "b.png"
+                first.write_bytes(png(sidebar))
+                second.write_bytes(png(banner))
+                a, b = module.content_grid(first), module.content_grid(second)
+                same, different = module.likeness(a, a), module.likeness(a, b)
+        except Exception as exc:
+            errors.append(f"{relative}: does not run: {exc}")
+            continue
+        if same < 0.999 or different >= module.ALIKE:
+            errors.append(f"{relative}: scores a page against itself {same:.2f} and a different layout {different:.2f}")
+    return errors
+
+
 def validate(root: Path) -> list[str]:
     root = root.resolve()
     errors = []
@@ -179,7 +223,7 @@ def validate(root: Path) -> list[str]:
                 errors.append(f"{doc.relative_to(root)}: non-portable local link {target}")
             elif not destination.exists():
                 errors.append(f"{doc.relative_to(root)}: missing local link {target}")
-    return errors + check_shared(root) + check_deal(root)
+    return errors + check_shared(root) + check_deal(root) + check_likeness(root)
 
 
 if __name__ == "__main__":

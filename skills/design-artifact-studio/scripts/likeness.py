@@ -1,4 +1,11 @@
-"""How alike two rendered studies are in layout, with color, tone and spacing set aside.
+#!/usr/bin/env python3
+"""How alike rendered studies are in layout, with color, tone and spacing set aside.
+
+Usage:
+  python3 likeness.py direction-1.png direction-2.png direction-3.png
+  python3 likeness.py ... --width 390     crop each render to the page when it is wider
+
+Prints a score for each pair and exits 1 when any pair reads as one layout.
 
 Each render becomes a grid of where its content sits: the page is cut into small square cells and
 each cell gets the spread of its grey values, high where there is text, an edge or a control, low
@@ -9,13 +16,15 @@ still matches the same list set tighter. The likeness is one minus the average c
 alignment: near 1 when the two read as one layout, lower as the arrangement differs.
 
 ALIKE was set on the author's eval runs: at 0.86 it flagged five of eight pairs judged to be
-one layout and one of 45 judged distinct. It is an aid to a person's judgment, not a measure
-of taste.
+one layout and one of 45 judged distinct. It measures arrangement only, so a pass does not prove
+two studies differ enough, and it says nothing about quality.
 
-Standard library only, so the eval runs without installing anything.
+Standard library only, so it runs wherever Python 3 does.
 """
 from __future__ import annotations
 
+import argparse
+import itertools
 import math
 import struct
 import zlib
@@ -128,3 +137,30 @@ def likeness(a: list[list[float]], b: list[list[float]]) -> float:
             total[i][j] = cost + _cost(first[i - 1], second[j - 1])
             steps[i][j] = length + 1
     return 1.0 - total[n][m] / steps[n][m]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("renders", nargs="+", type=Path, help="PNG renders of the studies, at the same width")
+    parser.add_argument("--width", type=int, help="crop each render to this many pixels from the left")
+    args = parser.parse_args()
+    if len(args.renders) < 2:
+        raise SystemExit("give two or more renders")
+    try:
+        grids = [content_grid(path, args.width) for path in args.renders]
+    except (OSError, ValueError) as error:
+        raise SystemExit(str(error))
+    alike = []
+    for (i, first), (j, second) in itertools.combinations(enumerate(args.renders), 2):
+        score = likeness(grids[i], grids[j])
+        print(f"{first.name} – {second.name}: {score:.2f}")
+        if score >= ALIKE:
+            alike.append(f"{first.name} and {second.name}")
+    if alike:
+        print(f"{'; '.join(alike)} read as one layout ({ALIKE} or more): rebuild one, then run this again")
+        raise SystemExit(1)
+    print(f"all below {ALIKE}")
+
+
+if __name__ == "__main__":
+    main()

@@ -58,7 +58,7 @@ The script checks only what a script can:
 - **content**: each study contains the strings listed in the brief's `must_contain`.
 - **self-contained**: a study loads nothing from outside except Google Fonts.
 - **renders**: each study renders at the brief's size.
-- **distinct**: no two studies read as one layout. [tools/likeness.py](tools/likeness.py) maps where each render's content sits, ignoring color and tone, aligns the two pages band by band so looser or tighter spacing still matches, and scores 0 to 1. A pair at 0.86 or more fails. The threshold comes from the author's own runs: it caught five of eight pairs judged to be one layout and wrongly flagged one of 45 judged distinct. Treat a failure as a prompt to look, and a pass as no guarantee.
+- **distinct**: no two studies read as one layout. The skill runs [likeness.py](../skills/design-artifact-studio/scripts/likeness.py) on its own renders before showing a set; the eval runs it again on the runner's renders. It maps where each render's content sits, ignoring color and tone, aligns the two pages band by band so looser or tighter spacing still matches, and scores 0 to 1. A pair at 0.86 or more fails. The threshold comes from the author's own runs: it caught five of eight pairs judged to be one layout and wrongly flagged one of 45 judged distinct. Treat a failure as a prompt to look, and a pass as no guarantee.
 
 Whether the directions are any good, whether they differ, and which one you would pick are for a person to judge from the sheet. A run that passes every check can still be dull.
 
