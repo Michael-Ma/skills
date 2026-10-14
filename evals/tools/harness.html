@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>render harness</title>
+<style>
+  html, body { margin: 0; background: #8a8a8a; }
+  iframe { display: block; border: 0; background: #fff; }
+  #miss { position: fixed; left: 0; right: 0; bottom: 0; background: #c00; color: #fff; font: 600 14px/1.4 -apple-system, Arial, sans-serif; padding: 6px 10px; z-index: 9; }
+</style>
+</head>
+<body>
+<iframe id="f" title="page under review"></iframe>
+<script>
+  // Loads ?src in a frame of ?w x ?h, runs ?do steps, then leaves the result for a screenshot.
+  // Steps, separated by "|": click:<text prefix>[@n]  fill:<css>::<text>  key:<Key>  scroll:<y>  gray:
+  var q = new URLSearchParams(location.search);
+  var f = document.getElementById('f');
+  f.style.width = (q.get('w') || 1180) + 'px';
+  f.style.height = (q.get('h') || 820) + 'px';
+  var steps = (q.get('do') || '').split('|').filter(Boolean);
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  function miss(s) {
+    var m = document.getElementById('miss') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'miss' }));
+    m.textContent = (m.textContent ? m.textContent + ' · ' : 'STEP TARGET NOT FOUND: ') + s;
+  }
+  f.addEventListener('load', async function () {
+    var d = f.contentDocument, w = f.contentWindow;
+    await sleep(400);
+    for (var i = 0; i < steps.length; i++) {
+      var s = steps[i], kind = s.slice(0, s.indexOf(':')), arg = s.slice(s.indexOf(':') + 1);
+      if (kind === 'click') {
+        var parts = arg.split('@'), label = parts[0].trim().toLowerCase(), nth = (+parts[1] || 1) - 1;
+        var els = Array.prototype.filter.call(
+          d.querySelectorAll('button, [role=button], a, summary, label, input[type=button], input[type=submit], [role=tab], [role=radio], [role=switch]'),
+          function (e) {
+            var r = e.getBoundingClientRect();
+            var t = (e.innerText || e.value || e.getAttribute('aria-label') || '').trim().toLowerCase();
+            return t.indexOf(label) === 0 && r.width > 0 && r.height > 0;
+          });
+        if (els[nth]) els[nth].click(); else miss(s);
+      } else if (kind === 'fill') {
+        var p = arg.split('::'), el = d.querySelector(p[0]);
+        if (el) { el.focus(); el.value = p[1] || ''; el.dispatchEvent(new w.Event('input', { bubbles: true })); el.dispatchEvent(new w.Event('change', { bubbles: true })); } else miss(s);
+      } else if (kind === 'key') {
+        var t = d.activeElement || d.body;
+        t.dispatchEvent(new w.KeyboardEvent('keydown', { key: arg, bubbles: true, cancelable: true }));
+        t.dispatchEvent(new w.KeyboardEvent('keyup', { key: arg, bubbles: true }));
+      } else if (kind === 'gray') {
+        f.style.filter = 'grayscale(1)';
+      } else if (kind === 'scroll') {
+        w.scrollTo(0, +arg || 0);
+      } else miss(s);
+      await sleep(350);
+    }
+  });
+  f.src = q.get('src');
+</script>
+</body>
+</html>

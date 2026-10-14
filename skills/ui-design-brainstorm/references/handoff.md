@@ -2,8 +2,8 @@
 
 Create one `HANDOFF.md` as the entry point. It is a record of decisions, not a second implementation skill. Include the following information proportionately:
 
-- **Status and authority:** unselected, user-selected, or provisional evaluation choice. Include the user's actual selection statement or reference. Name any subsequent changes. Never label an evaluator's preference as the user's approval.
-- **Selected visual:** exact relative file path; where useful, link alternative versions and prompts. Say whether it is a compositional reference, an exact reconstruction target, or only a mood reference.
+- **Status and authority:** unselected, user-selected, or chosen without a person in an unattended run. Include the user's actual selection statement or a reference to it, and after a direction round the seed and the directions shown. Name any subsequent changes. Never record your own recommendation, or anyone else's preference, as the user's approval.
+- **Selected visual:** exact relative file path; where useful, link alternative versions and prompts. State its role in the builder's terms: an exact target, whose evidenced layout and proportions are to be preserved, or inspiration, with the qualities to carry named (composition, palette, type, mood). A concept can be an exact target for its composition and inspiration for the rest; say which.
 - **Product contract:** audience, task, screen/state, exact fixture data, key domain rules, required interactions and important recovery paths. Label invented demo data and backend simulation.
 - **Design intent and adaptation:** record the selected qualities, why they matter to the user task, and what the builder may adapt. Distinguish fixed constraints from flexible treatments, including relevant visibility priorities. Carry the purpose of the design across formats and viewports rather than requiring incidental geometry. Preserve exact structure when the user requires it; do not guess pixel tokens from a raster.
 - **Correct:** an explicit list of hallucinated content, impossible states, misleading controls and other image defects the builder must not reproduce.

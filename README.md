@@ -8,10 +8,16 @@ Start with a brief, explore the choices that are still open, and inspect the act
 
 | Skill | Use it for | What you get |
 |---|---|---|
-| [ui-design-brainstorm](skills/ui-design-brainstorm/SKILL.md) | Exploring visual direction before implementation | Generated concepts, exact prompts, critique, and a portable handoff with the selection status recorded |
-| [design-artifact-studio](skills/design-artifact-studio/SKILL.md) | Creating, critiquing, or refining UI/UX artifacts | A critique, static study, or working prototype at the requested fidelity, with relevant review evidence |
+| [ui-design-brainstorm](skills/ui-design-brainstorm/SKILL.md) | Exploring visual direction as generated concept images, before implementation | Generated concepts, exact prompts, critique, and a portable handoff with the selection status recorded |
+| [design-artifact-studio](skills/design-artifact-studio/SKILL.md) | Creating, critiquing, or refining UI/UX artifacts | A critique, static study, or working prototype at the requested fidelity, with relevant review evidence. When the direction is open, three directions to choose from first |
 
 Use either skill independently. When you want both, explore with `ui-design-brainstorm`, choose a direction, then ask `design-artifact-studio` to implement the selected handoff. Brainstorming does not automatically authorize an application build.
+
+## Choosing a direction
+
+When the visual direction is open, both skills run a direction round before anything is built. They show three directions, each as a static study or a concept image, and stop for your choice. You can pick one, combine several, redirect, or ask for another set. Ask for one quick result to skip the round.
+
+The three directions are dealt by a small seeded script. For app and tool screens, the agent first looks at how two or three products in the category present the same screen. Products in one category share a layout and differ inside it, so the product deck keeps that usual layout in two directions and varies what leads, how each item reads, and one pattern borrowed from an app in another category; the third direction is a stretch with a different structure. Canvas, type and controls follow the category in all three. Brand-led pages, or a request for something bold, use an expressive deck. Before the deal, the agent writes a few cards from what you told it: your business objective, the scene of use, products that do the same job, and the subject's own world. Each direction then carries one of those cards, picked at random. The directions are not the model's own picks, and that is deliberate. In the author's rendered comparisons, a model choosing its own alternatives returned the same three looks on five different briefs. On the one brief where both were tried, the reviewer preferred the dealt set. That is one reviewer's judgment on a handful of briefs, not a benchmark.
 
 ## Install
 
@@ -69,11 +75,12 @@ See [complete examples](docs/examples.md) for independent use, a selected-concep
 
 ## Capabilities and limits
 
-- **UI Design Brainstorm requires native image generation in the host.** The instructions currently name Codex's native image tools. Installing the skill does not make those tools available. Without them, it can prepare a written brief but must report generation as blocked; it does not silently switch to an API-key workflow.
+- **UI Design Brainstorm needs an image tool.** It uses the host's own, or reaches Codex's built-in image tool through the `codex` CLI when the host has none, for example in Claude Code with Codex installed and logged in. Those calls count against your ChatGPT plan. With neither, it prepares a written brief and reports generation as blocked. It never asks for an API key and does not switch providers silently.
 - **Design Artifact Studio needs the appropriate renderer for verified output.** For web artifacts, that means browser access. When rendering or a particular check is unavailable, the result must identify what remains unverified.
-- **HTML is a fallback for portable interactive web prototypes.** Existing projects keep their framework and design system. Static studies and critiques need not become applications.
+- **HTML is the default for portable interactive web prototypes.** Existing projects keep their framework and design system. Static studies and critiques need not become applications.
 - **Generated UI images are concepts.** They do not demonstrate working interactions, responsive behavior, accessibility, or correct data. The implementation handoff records errors to correct and choices to preserve.
-- These are instructions authored for Codex, packaged in the agent-skills folder format. Compatibility with other agents depends on their tools and instruction support; universal host compatibility and improved design quality are not claimed.
+- **The direction round needs Python 3** to deal its directions. If the script cannot run, the skill says so and labels its options as chosen, not dealt.
+- These are instructions authored for Codex and also exercised in Claude Code, packaged in the agent-skills folder format. Compatibility with other agents depends on their tools and instruction support; universal host compatibility and improved design quality are not claimed.
 
 ## Maintain the collection
 
@@ -87,7 +94,13 @@ python3 -m venv .venv
 .venv/bin/python scripts/validate.py
 ```
 
-The same checks run in GitHub Actions. They check metadata and local file references, not heading anchors, visual taste, accessibility conformance, or behavior on unseen briefs. Evaluation across briefs is a separate activity from validating an individual artifact.
+The same checks run in GitHub Actions. They check metadata, local file references, that files carried by both skills are identical, and that the direction deal keeps its constraints. They do not check heading anchors, visual taste, accessibility conformance, or behavior on unseen briefs. Evaluation across briefs is a separate activity from validating an individual artifact.
+
+To see what an agent produces with these skills, run a brief through Codex or Claude Code with [evals/run.py](evals/README.md). It renders the three directions onto one sheet for you to judge, and checks that the recorded deal is the one the script dealt:
+
+```sh
+python3 evals/run.py run --runner codex --brief video-agent
+```
 
 ## Acknowledgments
 
