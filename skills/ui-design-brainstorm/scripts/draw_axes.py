@@ -125,8 +125,8 @@ def shared(a: dict[str, str], b: dict[str, str]) -> int:
 def deal(rng: random.Random, deck: str = DEFAULT_DECK, usual: str | None = None) -> list[dict[str, str]]:
     """Three sets of values. No two share more than MAX_SHARED, and none repeats on the deck's distinct axes.
 
-    In a grounded deck two sets keep USUAL as their structure and one, the stretch, is dealt a
-    structure other than `usual`.
+    In a grounded deck two sets keep USUAL as their structure and share no other value, and one,
+    the stretch, is dealt a structure other than `usual`.
     """
     axes = DECKS[deck]
     while True:
@@ -136,6 +136,9 @@ def deal(rng: random.Random, deck: str = DEFAULT_DECK, usual: str | None = None)
             for number, values in enumerate(sets):
                 values[STRUCTURE] = rng.choice([s for s in STRUCTURES if s != usual]) if number == stretch else USUAL
         apart = all(shared(a, b) <= MAX_SHARED for a, b in itertools.combinations(sets, 2))
+        if deck in GROUNDED_DECKS:
+            # the two that share a layout have to differ everywhere else
+            apart = apart and shared(*[values for values in sets if values[STRUCTURE] == USUAL]) == 1
         if apart and all(len({values[axis] for values in sets}) == len(sets) for axis in DISTINCT_AXES[deck]):
             return sets
 

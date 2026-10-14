@@ -8,7 +8,7 @@ The five briefs cover different kinds of surface:
 
 | Brief | Surface | Size |
 |---|---|---|
-| `video-agent` | Reviewing an AI video agent's draft clip before export | Desktop 1440×900 |
+| `video-agent` | Reviewing an AI director's keyframes in a conversational video studio before it makes video | Desktop 1440×900 |
 | `b2b-order-guide` | A restaurant's late-night order in a wholesale distributor's portal | Laptop 1280×800 |
 | `train-tickets` | Choosing a train in a consumer ticket app | Phone 390 wide |
 | `launch-board` | Deciding which rental slots to offer, at a counter in daylight | Tablet 1180×820 |

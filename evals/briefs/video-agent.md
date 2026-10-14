@@ -1,39 +1,37 @@
 ---
 id: video-agent
-title: Cutline, video agent clip review
+title: OpenSlate, keyframe review with the Director
 width: 1440
 height: 900
-frame: Each study must show the clip preview, the edit timeline, both points of uncertainty and the reviewer actions within one 1440×900 view.
-must_contain: Daniel Kraus | merino | 14:18 | fernway.example/layers | Ridgeline shell jacket
+frame: Each study must show the conversation with the Director's latest message and both of its points, the selected shot's large preview, all three Scene 2 keyframes, and the action that confirms the frames and starts video, within one 1440×900 view.
+must_contain: The Last Ferry | Harbour at dawn | Mara | maroon | 7.4
 ---
-"Cutline" is a fictional AI video agent. A marketing team gives it a long recording and a goal. It finds the moments, cuts a short clip, adds captions, b-roll and music, and pauses for a person to review the draft before anything is exported. This is the Review screen for one draft clip.
+OpenSlate is a local video studio with a conversational director. A person develops a short film in conversation with the Director, an AI agent that writes the treatment, scenes and shots, generates a keyframe for each shot, and then generates video from the keyframes the person has reviewed. The conversation sits beside a workbench with Plan, Keyframes, Assets and Film views. This is the moment the Director has returned a scene's keyframes and is waiting for the person before it generates video. OpenSlate's current interface is not a constraint here; the visual direction is open.
 
-Audience and scene: a social media producer at a desk with a large monitor, reviewing several drafts in a row each afternoon. They watch a draft at least once, then approve it, adjust it, or send it back. A clip that misquotes a speaker goes out under the brand's name.
+Audience and scene: an independent filmmaker making a short for their own channel, at a desk with a large monitor, in a session of an hour or two. They move back and forth between talking to the Director and looking at frames. They care how each shot looks and do not want to read job status.
 
-Business objective: the team turns each webinar into five clips a week. It wants review to take under two minutes per clip, and no published clip that changes what a speaker meant.
+Business objective: video costs money and minutes for every shot, so nobody should start video from a frame they have not looked at, and a problem the Director has already noticed should be fixed in the keyframe, before video, not after. Today most regenerated video traces back to something that was visible in its keyframe.
 
-What these producers already use every day: the timeline of a desktop video editor, and the preview in their phone's Instagram app.
+What these filmmakers already use every day: a chat assistant, an image generator, and the timeline of a desktop video editor.
 
-Products in this category: Frame.io, Descript, Opus Clip, CapCut.
+Products in this category: LTX Studio, Runway, Google Flow, Descript.
 
 Content (fictional; use exactly, and do not add data):
-- Workspace: Fernway Outdoor, marketing. 3 drafts are waiting for review. This one has waited 12 minutes.
-- Source: webinar recording "Packing light for a 3-day hike", 47:12 long, with two speakers: Mira Osei (host) and Daniel Kraus (guest, gear designer).
-- Goal given to the agent: "A 45-second vertical clip for Instagram about the three-layer rule, with captions, ending on the shop link."
-- Draft: 0:44 long, vertical 9:16, 1080 × 1920, captions burned in.
-- Edit decisions, in clip order:
-  1. 0:00–0:06 Hook. From the source at 12:41–12:47, Daniel: "Most people pack for the weather they fear, not the weather they'll get."
-  2. 0:06–0:21 The rule. From 13:02–13:17, Daniel explains the base, mid and shell layers.
-  3. 0:21–0:24 B-roll. Product shot "Ridgeline shell jacket" from the brand library.
-  4. 0:24–0:38 Example. From 14:10–14:27, Mira asks and Daniel answers; 3 seconds at 14:18 were removed.
-  5. 0:38–0:44 End card: "Shop the layers · fernway.example/layers".
-- Music: "Trailhead (loop)" from the brand library, under the speech at −18 dB.
-- Where the agent says it is unsure, two points:
-  a. "At 13:09 the transcript heard 'marina'. Daniel says 'merino', and I captioned it as 'merino'. Please confirm."
-  b. "The 3 seconds I removed at 14:18 are Daniel correcting himself: 'sorry, the mid layer, not the shell'. The clip is cleaner, but it changes which layer he names first."
-- Run facts: started 10:14, 3 minutes 52 seconds of work, 1 render.
-- Reviewer actions: approve and export; change a cut; edit the captions; send back with a note; open in the editor and take over.
-- No video, stills or photography are supplied and none may be faked. Show the preview and frames as labelled placeholders with their timecodes. Do not invent view counts, engagement figures, model names or other drafts' details.
-- Standard app chrome that carries no data of its own is expected, as on any shipped screen: the app's navigation, playback controls, timeline zoom, panel tabs.
+- Project: "The Last Ferry", a 48-second short film, 16:9, 1920 × 1080, 30 fps. 3 scenes, 8 shots.
+- Scene 1 "Closing time": 3 shots, video generated and saved.
+- Scene 2 "Harbour at dawn": 3 shots. Keyframes for all three are back; no video yet.
+  - 2.1 Wide. The empty harbour at dawn, the ferry moored, fog over the water. Motion: slow push-in. 5 s. Narration: none.
+  - 2.2 Medium. Mara on the pier in her red coat, a ticket in her hand. Motion: static, her breath visible. 4 s. Narration: none.
+  - 2.3 Close-up. The ticket's printed date, "Sunday 31 March", under Mara's thumb. Motion: slow tilt down. 6 s. Narration: "She'd kept the ticket for eleven years." The recorded line is 7.4 s.
+- Scene 3 "Departure": 2 shots, not started.
+- Conversation, latest at the bottom:
+  - You, 10:42: "@Scene 2 make the harbour feel colder, more like early morning, and keep Mara's red coat."
+  - Director, 10:44: "I rewrote the three Scene 2 prompts with a blue dawn light and kept Mara's red coat in 2.2. Keyframes for all three shots are back. Two things to check before I make video:"
+    a. "In 2.2 the coat came out maroon rather than red. I kept it because the light is low; regenerate 2.2 if you want it brighter."
+    b. "The narration for 2.3 is 7.4 seconds but the shot is 6 seconds. I suggest making 2.3 8 seconds, which moves Scene 3 two seconds later."
+- Video for Scene 2 starts only after the person has opened each of its three current keyframes. Earlier keyframes and Scene 1's video are kept.
+- Actions: reply to the Director; @ a scene or shot to point the conversation at it; select a shot; regenerate one shot's keyframe; edit a shot's prompt, motion, duration or narration; confirm Scene 2's frames and generate its video.
+- No images are supplied and none may be faked. Show keyframes and the preview as labelled placeholders with the shot number and its one-line description. Do not invent costs, credits, model names, view counts or other projects.
+- Standard app chrome that carries no data of its own is expected, as on any shipped screen: the project header, view tabs, a resize handle between conversation and workbench, playback controls, the message composer.
 
-Representative state for every study: the draft is ready, playback is paused at 0:00, and nothing is decided yet.
+Representative state for every study: Keyframes view open, shot 2.1 selected and opened; 2.2 and 2.3 not opened yet; the Director's 10:44 message is the latest; nothing confirmed.

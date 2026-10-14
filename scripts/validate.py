@@ -75,8 +75,10 @@ def check_deal(root: Path, seeds: int = 200) -> list[str]:
                 if grounded:
                     stretches = [values[module.STRUCTURE] for values in sets if values[module.STRUCTURE] != module.USUAL]
                     printed = module.describe(seed, cards, deck, usual)
-                    if len(stretches) != 1 or stretches[0] == usual or printed.count("(stretch)") != 1:
-                        errors.append(f"{relative}: {deck} seed {seed} does not keep the usual layout in two sets "
+                    alike = [values for values in sets if values[module.STRUCTURE] == module.USUAL]
+                    if (len(stretches) != 1 or stretches[0] == usual or printed.count("(stretch)") != 1
+                            or module.shared(*alike) != 1):
+                        errors.append(f"{relative}: {deck} seed {seed} does not keep the usual layout, and nothing else in common, in two sets "
                                       "and deal one stretch a different structure")
                         break
                 changed = [[axis for axis in values if values[axis] != before[axis]] for before, values in zip(sets, marked)]
