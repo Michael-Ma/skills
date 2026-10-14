@@ -4,11 +4,21 @@ The validator checks that the skills are well formed. These runs answer the ques
 
 Use it to see the same brief through Codex and through Claude Code, or to compare the skill before and after a change.
 
+The five briefs cover different kinds of surface:
+
+| Brief | Surface | Size |
+|---|---|---|
+| `video-agent` | Reviewing an AI video agent's draft clip before export | Desktop 1440×900 |
+| `b2b-order-guide` | A restaurant's late-night order in a wholesale distributor's portal | Laptop 1280×800 |
+| `train-tickets` | Choosing a train and fare in a consumer ticket app | Phone 390 wide |
+| `launch-board` | Deciding which rental slots to offer, at a counter in daylight | Tablet 1180×820 |
+| `landing` | A service's landing page, read by a wary office manager | Desktop 1440 wide |
+
 ## Run
 
 ```sh
-python3 evals/run.py run --runner codex --brief agent-review
-python3 evals/run.py run --runner claude --brief agent-review
+python3 evals/run.py run --runner codex --brief video-agent
+python3 evals/run.py run --runner claude --brief video-agent
 python3 evals/run.py run --runner codex --all --dry-run
 ```
 
@@ -30,8 +40,8 @@ It needs Python 3.9 or newer, Google Chrome or Chromium, and the chosen CLI inst
 The two CLIs are a convenience. To use an agent the runner cannot start, such as a desktop app, or when a CLI's login has expired, print the prompt, give it to the agent, and check the folder afterwards:
 
 ```sh
-python3 evals/run.py prompt --brief agent-review --dir /path/to/folder
-python3 evals/run.py check /path/to/folder --brief agent-review --runner codex-app
+python3 evals/run.py prompt --brief video-agent --dir /path/to/folder
+python3 evals/run.py check /path/to/folder --brief video-agent --runner codex-app
 ```
 
 `check` runs the same checks and renders the same sheet. An agent run this way needs to be able to start Chrome itself if it is to look at its own renders; the render queue is served only while `run` is running.
@@ -51,7 +61,7 @@ Whether the directions are any good, whether they differ, and which one you woul
 ## Compare runs
 
 ```sh
-python3 evals/run.py compare evals/out/<run-a>/agent-review evals/out/<run-b>/agent-review --blind
+python3 evals/run.py compare evals/out/<run-a>/video-agent evals/out/<run-b>/video-agent --blind
 ```
 
 This puts the directions from several runs on one sheet. With `--blind` they are shuffled and labelled A, B, C, and the mapping is written to `mapping.txt` without being printed. Judge first, then open it.
@@ -69,12 +79,12 @@ A brief is a Markdown file in [briefs](briefs/) with front matter and the brief 
 
 ```text
 ---
-id: agent-review
-title: Tern, AI agent review screen
+id: video-agent
+title: Cutline, video agent clip review
 width: 1440
 height: 900
-frame: Each study must show the whole decision within one 1440×900 view.
-must_contain: £84.00 | Dana Whitlock | HW-20931
+frame: Each study must show the clip preview, the edit timeline, both points of uncertainty and the reviewer actions within one 1440×900 view.
+must_contain: Daniel Kraus | merino | 14:18
 ---
 (product, audience and scene, business objective, what the audience already uses, exact content, representative state)
 ```

@@ -99,7 +99,7 @@ The same checks run in GitHub Actions. They check metadata, local file reference
 To see what an agent produces with these skills, run a brief through Codex or Claude Code with [evals/run.py](evals/README.md). It renders the three directions onto one sheet for you to judge, and checks that the recorded deal is the one the script dealt:
 
 ```sh
-python3 evals/run.py run --runner codex --brief agent-review
+python3 evals/run.py run --runner codex --brief video-agent
 ```
 
 ## Acknowledgments

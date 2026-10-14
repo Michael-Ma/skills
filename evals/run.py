@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Run design briefs through an agent CLI with these skills, then render the results for a person to judge.
 
-  python3 evals/run.py run --runner codex --brief agent-review
+  python3 evals/run.py run --runner codex --brief video-agent
   python3 evals/run.py run --runner claude --all
   python3 evals/run.py run --runner codex --all --dry-run
-  python3 evals/run.py prompt --brief agent-review --dir /path/to/folder   print the prompt for any agent
-  python3 evals/run.py check /path/to/folder --brief agent-review          check and render what it made
+  python3 evals/run.py prompt --brief video-agent --dir /path/to/folder   print the prompt for any agent
+  python3 evals/run.py check /path/to/folder --brief video-agent          check and render what it made
   python3 evals/run.py compare evals/out/<run>/<brief> evals/out/<run>/<brief> --blind
 
 Taste is judged by a person looking at the sheet. The script checks only what a script can: that
