@@ -179,8 +179,10 @@ def check_deal(record: str, deal) -> tuple[bool, str]:
 
 def last_deal(run_dir: Path) -> list[str]:
     record = run_dir / "deal.txt"
+    """The last full deal in deal.txt; a single-axis redraw printed after it is not a deal."""
     blocks = re.split(r"(?m)^(?=seed \d+\s*$)", record.read_text(encoding="utf-8")) if record.is_file() else []
-    return blocks[-1].splitlines() if blocks else []
+    deals = [block for block in blocks if "Direction 1" in block]
+    return deals[-1].splitlines() if deals else []
 
 
 def stretch_direction(run_dir: Path) -> int | None:
