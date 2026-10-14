@@ -34,6 +34,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVALS = ROOT / "evals"
 SHOT = EVALS / "tools" / "shot.sh"
 SKILL = ROOT / "skills" / "design-artifact-studio"
+sys.path.insert(0, str(EVALS / "tools"))
+import likeness  # noqa: E402  (beside shot.sh, standard library only)
 DIRECTIONS = (1, 2, 3)
 SHEET_IMAGE_WIDTH = 760
 FRAMED_BELOW = 500  # shot.sh frames narrower pages at the left of an image this wide
@@ -254,7 +256,25 @@ def run_checks(brief: Brief, run_dir: Path) -> list[dict]:
         record(f"self-contained {n}", not outside, "no outside files" if not outside else "loads " + ", ".join(outside[:3]))
         ok, message = shot(study, run_dir / "_eval" / f"direction-{n}.png", brief.width, brief.height)
         record(f"renders {n}", ok, message)
+    renders = [run_dir / "_eval" / f"direction-{n}.png" for n in DIRECTIONS]
+    if all(render.is_file() for render in renders):
+        record("distinct", *check_distinct(renders, brief.width))
     return checks
+
+
+def check_distinct(renders: list[Path], width: int) -> tuple[bool, str]:
+    """No two studies read as one layout once color, tone and spacing are set aside."""
+    try:
+        grids = [likeness.content_grid(render, width) for render in renders]
+    except ValueError as error:
+        return False, str(error)
+    scores = {(i + 1, j + 1): likeness.likeness(grids[i], grids[j])
+              for i in range(len(grids)) for j in range(i + 1, len(grids))}
+    alike = [f"{a} and {b}" for (a, b), score in scores.items() if score >= likeness.ALIKE]
+    shown = " · ".join(f"{a}–{b} {score:.2f}" for (a, b), score in scores.items())
+    if alike:
+        return False, f"{shown}; {', '.join(alike)} read as one layout (likeness {likeness.ALIKE} or more)"
+    return True, f"{shown}; all below {likeness.ALIKE}"
 
 
 # --- the sheet a person looks at --------------------------------------------------------------
