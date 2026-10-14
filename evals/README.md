@@ -73,7 +73,7 @@ This puts the directions from several runs on one sheet. With `--blind` they are
 ## Cost and safety
 
 - A direction round takes an agent roughly twenty to thirty minutes per brief. Codex runs count against your ChatGPT plan and Claude runs against your Claude plan.
-- Codex runs in its `workspace-write` sandbox, where Chrome cannot start. The agent still gets to look at its work: `tools/shot.sh` leaves a request in the run folder's `.render-queue`, and `run.py`, outside the sandbox, renders it and writes the image back. The runner renders only files inside that run folder.
+- Codex runs in its `workspace-write` sandbox, where Chrome cannot start: it aborts and leaves a macOS crash report. The agent still gets to look at its work. While `run.py` runs, `tools/shot.sh` hands every render to the run folder's `.render-queue` instead of starting Chrome itself, and `run.py`, outside the sandbox, renders it and writes the image back. The runner renders only files inside that run folder, and removes the queue when the agent finishes.
 - The Claude runner allows shell commands, file edits and web lookups without asking (`--permission-mode acceptEdits` with `Bash`, `Read`, `Write`, `Edit`, `Glob`, `Grep`, `WebSearch` and `WebFetch`). Codex runs with live web search. Run only briefs you trust.
 - The agent is told to use the skill copy in this repository and to ignore any installed copy. An installed older copy with the same name can still be picked up by the CLI; check `agent.log` if a result looks like the old behavior.
 

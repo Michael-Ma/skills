@@ -5,8 +5,9 @@
 #        gray: renders the page without color
 # Widths below 500 are framed at the left of a 500px-wide image (grey fills the rest).
 #
-# When Chrome cannot start here, as inside an agent's sandbox, and a ".render-queue" folder exists
-# above the output path, the request is handed to evals/run.py, which renders it outside the sandbox.
+# While evals/run.py is running an agent, a ".render-queue" folder exists above the output path, and
+# every request goes there: run.py renders it outside the agent's sandbox. Chrome is not started
+# here first, since inside a sandbox it aborts and leaves a macOS crash report behind.
 here=$(cd "$(dirname "$0")" && pwd)
 src="$1"; out="$2"; w="${3:-1180}"; h="${4:-820}"; steps="${5:-}"
 [ -n "$src" ] && [ -n "$out" ] || { echo "usage: sh shot.sh <abs .html> <abs out.png> [width] [height] [steps]"; exit 2; }
@@ -43,9 +44,12 @@ find_queue() {
   return 1
 }
 
-if direct 2>/dev/null; then echo "wrote $out (viewport ${w}x${h})"; exit 0; fi
-[ -n "$SHOT_DIRECT" ] && { echo "render failed"; exit 1; }
-queue=$(find_queue) || { echo "render failed: Chrome could not start here and no render queue was found"; exit 1; }
+queue=""
+[ -z "$SHOT_DIRECT" ] && queue=$(find_queue)
+if [ -z "$queue" ]; then
+  if direct 2>/dev/null; then echo "wrote $out (viewport ${w}x${h})"; exit 0; fi
+  echo "render failed: Chrome could not start here and no render queue was found"; exit 1
+fi
 
 id="$$-$(date +%s)"
 printf '%s\n%s\n%s\n%s\n%s\n' "$src" "$out" "$w" "$h" "$steps" > "$queue/$id.tmp" && mv "$queue/$id.tmp" "$queue/$id.req"
