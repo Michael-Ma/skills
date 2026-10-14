@@ -2,6 +2,7 @@
 # Render a local HTML file in headless Chrome and write a PNG.
 # usage: sh shot.sh <absolute path to .html> <absolute path to out.png> [width=1180] [height=820] [steps]
 # steps: "|"-separated, run before capture: click:<text prefix>[@n]  fill:<css>::<text>  key:<Key>  scroll:<y>
+#        gray: renders the page without color
 # Widths below 500 are framed at the left of a 500px-wide image (grey fills the rest).
 #
 # When Chrome cannot start here, as inside an agent's sandbox, and a ".render-queue" folder exists

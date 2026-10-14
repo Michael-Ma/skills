@@ -87,8 +87,8 @@ Deliver, inside {run_dir}:
 - DESIGN.md: the record the skill asks for.
 
 Rendering. A renderer is available and is the only one you may use:
-sh {SHOT} <absolute path to .html> <absolute path to out.png> [width] [height]
-It writes a PNG that you can open and look at, and can take up to a minute per image. Widths below {FRAMED_BELOW} are framed at the left of a {FRAMED_BELOW}px-wide image, with grey filling the rest. Do not start servers or use any other browser, preview or screenshot tool.
+sh {SHOT} <absolute path to .html> <absolute path to out.png> [width] [height] [gray:]
+It writes a PNG that you can open and look at, and can take up to a minute per image. Pass gray: after the height to render the page without color. Widths below {FRAMED_BELOW} are framed at the left of a {FRAMED_BELOW}px-wide image, with grey filling the rest. Do not start servers or use any other browser, preview or screenshot tool.
 
 Constraints: write only inside {run_dir}. Use fictional names only.
 

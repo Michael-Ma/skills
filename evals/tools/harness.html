@@ -13,7 +13,7 @@
 <iframe id="f" title="page under review"></iframe>
 <script>
   // Loads ?src in a frame of ?w x ?h, runs ?do steps, then leaves the result for a screenshot.
-  // Steps, separated by "|": click:<text prefix>[@n]  fill:<css>::<text>  key:<Key>  scroll:<y>
+  // Steps, separated by "|": click:<text prefix>[@n]  fill:<css>::<text>  key:<Key>  scroll:<y>  gray:
   var q = new URLSearchParams(location.search);
   var f = document.getElementById('f');
   f.style.width = (q.get('w') || 1180) + 'px';
@@ -46,6 +46,8 @@
         var t = d.activeElement || d.body;
         t.dispatchEvent(new w.KeyboardEvent('keydown', { key: arg, bubbles: true, cancelable: true }));
         t.dispatchEvent(new w.KeyboardEvent('keyup', { key: arg, bubbles: true }));
+      } else if (kind === 'gray') {
+        f.style.filter = 'grayscale(1)';
       } else if (kind === 'scroll') {
         w.scrollTo(0, +arg || 0);
       } else miss(s);
